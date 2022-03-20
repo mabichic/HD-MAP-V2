@@ -44,19 +44,19 @@ function Layers({ children }) {
     if (source === null) return;
 
 
-    const modify = new Modify({ source: source });
-    // modify.on('modifystart', (e) => {
+    // const modify = new Modify({ source: source });
+    // // modify.on('modifystart', (e) => {
 
+    // // });
+    // modify.on('modifyend', (e) => {
+    //   let features = e.features.getArray() as any[];
+    //   let coord = features[0].getGeometry().getCoordinates();
+    //   let dataRow = features[0].getProperties();
+    //   features[0].set('PointXY', coord)
+    //   featureService.sendMessage("change",features[0].getId());
     // });
-    modify.on('modifyend', (e) => {
-      let features = e.features.getArray() as any[];
-      let coord = features[0].getGeometry().getCoordinates();
-      let dataRow = features[0].getProperties();
-      features[0].set('PointXY', coord)
-      featureService.sendMessage("change",features[0].getId());
-    });
 
-    map.addInteraction(modify);
+    // map.addInteraction(modify);
   }, [sources]);
   return (
     <>

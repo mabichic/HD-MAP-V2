@@ -12,7 +12,8 @@ const HdMapVectorLayer = ({source, style, title, zIndex = 0 }) =>{
             source: source,
             style : style, 
             properties : { 
-                title : title
+                title : title, 
+                selectable : false,
             }
         })
         map.addLayer(vectorLayer);

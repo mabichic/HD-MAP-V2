@@ -4,6 +4,7 @@ import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Circle from 'ol/style/Circle'
 import Point from "ol/geom/Point";
+import { LineString, MultiPoint } from "ol/geom";
 const HdMapStyle = function(feature, resolution) {
     var zoom = Math.log2(156543.03390625) - Math.log2(resolution);
 
@@ -130,5 +131,45 @@ const HdMapStyle = function(feature, resolution) {
     }
 
 };
-
+export const selectedStyle = function(feature){
+    var styles = [];
+    if (feature.getGeometry().getType() === 'Point') {
+        styles.push(new Style({
+            image: new Circle({
+                radius: 7,
+                fill: new Fill({
+                    color: 'rgba(0,0,255,1)'
+                }),
+            })
+        })); 
+    }
+    if (feature.getGeometry().getType() === 'Polygon') {
+        styles.push(
+            new Style({
+                fill: new Fill({
+                    color: 'rgba(0,0,255,0.4)'
+                }),
+            })); 
+        }
+        if (feature.getGeometry().getType() === 'LineString') {
+            var coordinates = feature.getGeometry().getCoordinates();
+            styles.push(new Style({
+                geometry: new LineString(coordinates),
+                stroke: new Stroke({
+                    color:'rgba(0,0,255,0.6)', width:5
+                }),
+            })); 
+            styles.push(new Style({
+                geometry: new MultiPoint(coordinates),
+                image: new Circle({
+                    radius: 5,
+                    fill: new Fill({
+                        color: 'rgba(0,0,255,1)'
+                    }),
+                })
+            })); 
+        }
+        return styles;
+    }
+    
 export default HdMapStyle;
