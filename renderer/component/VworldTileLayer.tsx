@@ -13,7 +13,8 @@ const VworldTileLayer = ({zIndex = 0 }) =>{
             }),
             properties : {
                 title : "브이월드"
-            }
+            }, 
+            zIndex: 0
         });
         map.addLayer(vectorLayer);
     },[map]);

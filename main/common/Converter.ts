@@ -18,7 +18,7 @@ const objectSet = {
   LAYER_LN_NODE: LAYER_LN_NODE,
 };
 
-export default function Converter(layerNM: "LAYER_LANESIDE" | "LAYER_LN_LINK" | "LAYER_LN_NODE" | "LAYER_POI" | "LAYER_ROADLIGHT" | "LAYER_ROADMARK", dataSet: Array<any>, filePath: string) {
+export default function Converter(layerNM: "LAYER_LANESIDE" | "LAYER_LN_LINK" | "LAYER_LN_NODE" | "LAYER_POI" | "LAYER_ROADLIGHT" | "LAYER_ROADMARK",index:number,  dataSet: Array<any>, filePath: string) {
   let geoType: "Point" | "LineString" | "Polygon" | "MultiPoint" | "MultiLineString" | "MultiPolygon" = "Point";
   switch (layerNM) {
     case "LAYER_LANESIDE":
@@ -45,7 +45,7 @@ export default function Converter(layerNM: "LAYER_LANESIDE" | "LAYER_LN_LINK" | 
       let geson: GEOJSONTYPE = {
         type: "Feature",
         group: layerNM,
-        id: layerNM + "_" + obj.ID,
+        id: layerNM +index+ "_" + obj.ID,
         geometry: {
           type: geoType,
           coordinates: obj.PointXY,

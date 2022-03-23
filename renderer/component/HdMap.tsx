@@ -50,7 +50,6 @@ function HdMap({ children, zoom, center }) {
         });
         select.on("select", (e) => {
             let features = e.selected as any[];
-            console.log(features);
             featureService.selected("selected", features);
         });
   
@@ -64,6 +63,7 @@ function HdMap({ children, zoom, center }) {
         });
         dragBox.on('boxend', function () {
             const selectedFeatures = select.getFeatures();
+            selectedFeatures.clear();
             const rotation = mapObject.getView().getRotation();
             const oblique = rotation % (Math.PI / 2) !== 0;
             const candidateFeatures = oblique ? [] : selectedFeatures;
@@ -76,6 +76,7 @@ function HdMap({ children, zoom, center }) {
                 }
             });
             featureService.selected("selected", candidateFeatures);
+            
             if (oblique) {
                 const anchor = [0, 0];
                 const geometry = dragBox.getGeometry().clone();

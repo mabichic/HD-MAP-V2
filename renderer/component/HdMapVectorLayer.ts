@@ -3,7 +3,6 @@ import VectorImageLayer from 'ol/layer/VectorImage';
 import MapContext from "./context/MapContext";
 
 const HdMapVectorLayer = ({source, style, title, zIndex = 0 }) =>{
-
     const map = useContext(MapContext);
     useEffect (() =>{
         if(!map) return;
@@ -14,8 +13,11 @@ const HdMapVectorLayer = ({source, style, title, zIndex = 0 }) =>{
             properties : { 
                 title : title, 
                 selectable : false,
-            }
-        })
+                dataVisible : false,
+            }, 
+            zIndex : map.getLayers().getLength(),
+        });
+        console.log(vectorLayer.getZIndex());
         map.addLayer(vectorLayer);
     },[map]);
 

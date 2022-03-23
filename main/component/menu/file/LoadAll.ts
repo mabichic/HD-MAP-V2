@@ -26,7 +26,7 @@ export default function LoadAll(mainWindow: BrowserWindow, store: any) {
           ["LAYER_LANESIDE", "LAYER_LN_LINK", "LAYER_LN_NODE", "LAYER_POI", "LAYER_ROADLIGHT", "LAYER_ROADMARK"].forEach(
             (layerNM: "LAYER_LANESIDE" | "LAYER_LN_LINK" | "LAYER_LN_NODE" | "LAYER_POI" | "LAYER_ROADLIGHT" | "LAYER_ROADMARK") => {
               if (getExtensionOfFilename(file.toLowerCase()) === ".txt" && file.toUpperCase().includes(layerNM)) {
-                Converter(layerNM, dataSet['features'], dir + "/" + file);
+                Converter(layerNM, index, dataSet['features'], dir + "/" + file);
               }
             }
           );

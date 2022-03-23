@@ -13,8 +13,9 @@ import { Modify } from 'ol/interaction'
 import MapContext from "./context/MapContext";
 import LayersContext from "./context/LayersContext";
 import { LineString, Point, Polygon } from "ol/geom";
-import { featureService } from './service/message.service';
+import { featureService, layerService } from './service/message.service';
 import SourcesContext from "./context/SourcesContext";
+import Tables from "./Tables";
 
 function Layers({ children }) {
   const map = useContext(MapContext);
@@ -24,39 +25,26 @@ function Layers({ children }) {
   useEffect(() => {
     ipcRenderer.on("load", (event, args) => {
       let features = new GeoJSON().readFeatures(args);
-      console.log(args);
       let source = new VectorSource({
         features: features
       });
       let layer = () => {
-        return <HdMapVectorLayer title={'Layer Set '+ args.index} source={source} style={HdMapStyle} />
+     
+        return <HdMapVectorLayer title={'Layer Set '+ args.index} source={source} style={HdMapStyle}/>
       }
       // <HdMapVectorLayer source={source} style={HdMapStyle} />
       setObjs(objs => [...objs, features]);
       setSources(sources => [...sources, source]);
       setLayers(layers => [...layers, layer])
     });
+   
+
     return () => { }
   }, []);
   useEffect(() => {
     if (map === null) return;
     let source = sources[0];
     if (source === null) return;
-
-
-    // const modify = new Modify({ source: source });
-    // // modify.on('modifystart', (e) => {
-
-    // // });
-    // modify.on('modifyend', (e) => {
-    //   let features = e.features.getArray() as any[];
-    //   let coord = features[0].getGeometry().getCoordinates();
-    //   let dataRow = features[0].getProperties();
-    //   features[0].set('PointXY', coord)
-    //   featureService.sendMessage("change",features[0].getId());
-    // });
-
-    // map.addInteraction(modify);
   }, [sources]);
   return (
     <>
@@ -68,8 +56,8 @@ function Layers({ children }) {
               <Layer key={index}></Layer>
             )
           })}
-
           <TestButton />
+          <Tables />
           <div>{children}</div>
         </FeaturesContext.Provider>
         </SourcesContext.Provider>
