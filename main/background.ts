@@ -22,6 +22,7 @@ if (isProd) {
   const mainWindow = createWindow("main", {
     width: 1000,
     height: 600,
+    title : "HD-MAP"
   });
 
   const menu = Menu.buildFromTemplate(HDMapMenu(mainWindow,store));

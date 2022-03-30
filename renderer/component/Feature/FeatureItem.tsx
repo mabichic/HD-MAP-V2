@@ -1,11 +1,7 @@
-import { SyntheticEvent, useCallback, useContext, useEffect, useRef, useState } from "react";
-import FeaturesContext from "../context/FeaturesContext";
+import { SyntheticEvent, useContext, useEffect, useState } from "react";
 import { featureService } from "../service/message.service";
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
-import { AgGridReact } from "ag-grid-react";
-import GeoJSON from "ol/format/GeoJSON";
-import SourcesContext from "../context/SourcesContext";
 import MapContext from "../context/MapContext";
 import { FormControlLabel, Radio, RadioGroup, Tab, Tabs } from "@mui/material";
 import FeatureGrid from "./FeatureGrid";
@@ -31,15 +27,7 @@ export default function FeatureItem({ index, source }) {
     const [viewer, setViewer] = useState('all');
 
     const [value, setValue] = useState('1');
-    const onRowSelected = (e) => {
-        if (e.node.isSelected()) {
-            let feature = source.getFeatureById(e.node.data.featureID);
-            if (isFinite(feature.getGeometry().getExtent()[0]) && isFinite(feature.getGeometry().getExtent()[1]) && isFinite(feature.getGeometry().getExtent()[2]) && isFinite(feature.getGeometry().getExtent()[3])) {
-                map.getView().fit(feature.getGeometry().getExtent(), { duration: 500, size: map.getSize(), maxZoom: 23, padding: [0, 0, 0, 0] });
-            }
-
-        }
-    };
+    
     const init = () => {
         let layer_laneside = [];
         let layer_ln_link = [];
@@ -82,7 +70,7 @@ export default function FeatureItem({ index, source }) {
         let layer_roadlight = [];
         let layer_roadmark = [];
         const pushData = (feature: any, group: string, dataSet: Array<any>) => {
-            if (selectedFeatureIDS.includes(feature.getId())&&feature.get("group") === group) {
+            if (selectedFeatureIDS.includes(feature.getId()) && feature.get("group") === group) {
                 let data = feature.getProperties();
                 data.featureID = feature.getId();
                 dataSet.push(data);
@@ -121,7 +109,7 @@ export default function FeatureItem({ index, source }) {
 
     useEffect(() => {
         let subscription = featureService.getMessage().subscribe(message => {
-            console.log(message);
+
             if (message) {
                 if (viewer === "selected" && message.state === "selected") {
                     update(message.features);
@@ -147,7 +135,7 @@ export default function FeatureItem({ index, source }) {
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }} >
-            <div style={{ height: '50px' }}>
+            <div style={{ height: '50px' , backgroundColor:'white'}}>
                 <RadioGroup
                     row
                     aria-labelledby="demo-row-radio-buttons-group-label"
@@ -162,34 +150,22 @@ export default function FeatureItem({ index, source }) {
             <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                 <TabContext value={value}>
                     <TabPanel sx={{ flexGrow: 1, padding: '0px' }} value="1">
-                        <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' }}>
-                            <FeatureGrid feature={layerLaneside} onRowSelected={onRowSelected} viewer={viewer} filter={filter} />
-                        </div>
+                            <FeatureGrid feature={layerLaneside}/>
                     </TabPanel>
                     <TabPanel sx={{ flexGrow: 1, padding: '0px' }} value="2">
-                        <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' }}>
-                            <FeatureGrid feature={layerLnLink} onRowSelected={onRowSelected} viewer={viewer} filter={filter} />
-                        </div>
+                            <FeatureGrid feature={layerLnLink} />
                     </TabPanel>
                     <TabPanel sx={{ flexGrow: 1, padding: '0px' }} value="3">
-                        <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' }}>
-                            <FeatureGrid feature={layerLnNode} onRowSelected={onRowSelected} viewer={viewer} filter={filter} />
-                        </div>
+                            <FeatureGrid feature={layerLnNode} />
                     </TabPanel>
                     <TabPanel sx={{ flexGrow: 1, padding: '0px' }} value="4">
-                        <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' }}>
-                            <FeatureGrid feature={layerPoi} onRowSelected={onRowSelected} viewer={viewer} filter={filter} />
-                        </div>
+                            <FeatureGrid feature={layerPoi} />
                     </TabPanel>
                     <TabPanel sx={{ flexGrow: 1, padding: '0px' }} value="5">
-                        <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' }}>
-                            <FeatureGrid feature={layerRoadlight} onRowSelected={onRowSelected} viewer={viewer} filter={filter} />
-                        </div>
+                            <FeatureGrid feature={layerRoadlight} />
                     </TabPanel>
                     <TabPanel sx={{ flexGrow: 1, padding: '0px' }} value="6">
-                        <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' }}>
-                            <FeatureGrid feature={layerRoadmark} onRowSelected={onRowSelected} viewer={viewer} filter={filter} />
-                        </div>
+                            <FeatureGrid feature={layerRoadmark}  />
                     </TabPanel>
                     <TabList sx={{ height: '50px' }} onChange={handleChange} aria-label="lab API tabs example" variant="scrollable" scrollButtons="auto">
                         <Tab label="Laneside" value="1" />

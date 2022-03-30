@@ -1,67 +1,108 @@
 import { ipcRenderer } from "electron";
-import { Feature } from "ol";
 import GeoJSON from "ol/format/GeoJSON";
 import VectorSource from "ol/source/Vector";
-import { createContext, useContext, useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
-import { HdMapObjState } from "../state/HdMapObj";
-import FeaturesContext from "./context/FeaturesContext";
+import { useContext, useEffect, useRef, useState } from "react";
 import HdMapStyle from "./HdMapStyle";
-import HdMapVectorLayer from "./HdMapVectorLayer";
+import HdMapVectorLayer from "./layer/HdMapVectorLayer";
 import TestButton from "./TestButton";
-import { Modify } from 'ol/interaction'
 import MapContext from "./context/MapContext";
-import LayersContext from "./context/LayersContext";
-import { LineString, Point, Polygon } from "ol/geom";
 import { featureService, layerService } from './service/message.service';
-import SourcesContext from "./context/SourcesContext";
 import Tables from "./Tables";
+import VectorImageLayer from "ol/layer/VectorImage";
+import TileLayer from "ol/layer/Tile";
+import VworldTileLayer from "./layer/VworldTileLayer";
+import FeatureTable from "./Feature/FeatureTable";
+
+function compare(a: TileLayer<any> | VectorImageLayer<any>, b: TileLayer<any> | VectorImageLayer<any>) {
+  return b.getZIndex() - a.getZIndex()
+}
 
 function Layers({ children }) {
   const map = useContext(MapContext);
-  const [objs, setObjs] = useState([]);
   const [layers, setLayers] = useState([]);
-  const [sources, setSources] = useState([]);
+  const [showTableLayers, setShowTableLayers] = useState([]);
+  const wrapRef = useRef(null);
   useEffect(() => {
+    if (!map) return;
+    setLayers([VworldTileLayer({ zIndex: 0, map: map })]);
     ipcRenderer.on("load", (event, args) => {
       let features = new GeoJSON().readFeatures(args);
       let source = new VectorSource({
         features: features
       });
-      let layer = () => {
-     
-        return <HdMapVectorLayer title={'Layer Set '+ args.index} source={source} style={HdMapStyle}/>
-      }
-      // <HdMapVectorLayer source={source} style={HdMapStyle} />
-      setObjs(objs => [...objs, features]);
-      setSources(sources => [...sources, source]);
-      setLayers(layers => [...layers, layer])
+      setLayers(layers => [...layers, HdMapVectorLayer({ zIndex: map.getLayers().getLength(), map: map, source: source, style: HdMapStyle, title: 'Layer Set ' + args.index })].sort(compare));
     });
-   
-
-    return () => { }
-  }, []);
+    return () => {
+      ipcRenderer.removeAllListeners("load");
+    }
+  }, [map]);
   useEffect(() => {
-    if (map === null) return;
-    let source = sources[0];
-    if (source === null) return;
-  }, [sources]);
+    if (!map) return;
+    let subscription = layerService.getMessage().subscribe(message => {
+      let tempLayers = [];
+      let messageIndex = -1;
+      let tempZIndex = -1;
+      tempLayers = layers;
+      tempLayers.sort(compare);
+      tempLayers.forEach((layer, index) => {
+        if (layer === message.layer) {
+          messageIndex = index;
+          tempZIndex = layer.getZIndex();
+        }
+      });
+      if (message.state === "zIndexUp" && messageIndex > 0) {
+        tempLayers[messageIndex].setZIndex(tempLayers[messageIndex - 1].getZIndex());
+        tempLayers[messageIndex - 1].setZIndex(tempZIndex);
+      } else if (message.state === "zIndexDown" && (messageIndex < tempLayers.length - 1)) {
+        tempLayers[messageIndex].setZIndex(tempLayers[messageIndex + 1].getZIndex());
+        tempLayers[messageIndex + 1].setZIndex(tempZIndex);
+      } else if (message.state === "layerDelete") {
+        for (let i = 0; i < messageIndex; i++) {
+          tempLayers[i].setZIndex(tempLayers[i].getZIndex() - 1);
+        }
+        tempLayers = tempLayers.filter((layer) => {
+          return layer != message.layer;
+        });
+        map.removeLayer(message.layer);
+        setShowTableLayers((layers)=>layers.filter((layer)=>{
+          return layer != message.layer;
+        }));
+      }
+      tempLayers.sort(compare);
+      setLayers([...tempLayers]);
+    });
+    return () => {
+      subscription.unsubscribe();
+    }
+  }, [map, layers])
+
+  useEffect(() => {
+    let subscription = featureService.getMessage().subscribe(message => {
+      if (message.state === "visible") {
+        let arr = showTableLayers;
+        if (!showTableLayers.includes(message.layer)) arr.push(message.layer);
+        setShowTableLayers([...arr]);
+      }else if(message.state ==="unvisible"){
+        let arr = showTableLayers;
+        setShowTableLayers((layers) => layers.filter((layer)=>{
+          return layer != message.layer;
+        }));
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+    }
+  }, [showTableLayers])
   return (
     <>
-      <LayersContext.Provider value={layers}>
-        <SourcesContext.Provider value={sources}>
-        <FeaturesContext.Provider value={objs}>
-          {layers.map((Layer, index) => {
-            return (
-              <Layer key={index}></Layer>
-            )
-          })}
-          <TestButton />
-          <Tables />
-          <div>{children}</div>
-        </FeaturesContext.Provider>
-        </SourcesContext.Provider>
-      </LayersContext.Provider>
+      <TestButton layers={layers} />
+      <div ref={wrapRef}>
+        {showTableLayers.map((layer) => {
+          return <FeatureTable key={layer.get('title')} source={layer.getSource()} wrapRef={wrapRef} title={layer.get('title')} layer={layer} />
+        })}
+      </div>
+      {/* <Tables layers={layers} /> */}
+      <div>{children}</div>
     </>
   )
 };

@@ -97,7 +97,12 @@ function HdMap({ children, zoom, center }) {
         mapObject.addInteraction(dragBox);
         mapObject.setTarget(mapRef.current);
         setMap(mapObject);
-        return () => mapObject.setTarget(undefined);
+        return () => {
+            mapObject.setTarget(undefined);
+            mapObject.getLayers().forEach((layer)=>{
+                mapObject.removeLayer(layer);
+            });
+        }
     }, []);
     useEffect(() => {
         if (!map) return;
