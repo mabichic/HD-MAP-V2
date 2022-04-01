@@ -3,7 +3,7 @@ import { featureService } from "../service/message.service";
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
 import MapContext from "../context/MapContext";
-import { FormControlLabel, Radio, RadioGroup, Tab, Tabs } from "@mui/material";
+import { Divider, FormControlLabel, Radio, RadioGroup, Tab, Tabs } from "@mui/material";
 import FeatureGrid from "./FeatureGrid";
 import { Feature } from "ol";
 import { Select } from "ol/interaction";
@@ -135,17 +135,19 @@ export default function FeatureItem({ index, source }) {
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }} >
-            <div style={{ height: '50px' , backgroundColor:'white'}}>
+            <div style={{ height: '50px' , backgroundColor:'white', padding:'0px'}}>
                 <RadioGroup
                     row
                     aria-labelledby="demo-row-radio-buttons-group-label"
                     name="row-radio-buttons-group"
                     value={viewer}
                     onChange={viewerChange}
+                    sx={{paddingLeft:'20px'}}
                 >
-                    <FormControlLabel value="all" control={<Radio />} label="모두보기" />
+                    <FormControlLabel value="all" control={<Radio />} label="모두보기"/>
                     <FormControlLabel value="selected" control={<Radio />} label="선택된 객체만 보기" />
                 </RadioGroup>
+                <Divider />
             </div>
             <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                 <TabContext value={value}>
@@ -167,7 +169,8 @@ export default function FeatureItem({ index, source }) {
                     <TabPanel sx={{ flexGrow: 1, padding: '0px' }} value="6">
                             <FeatureGrid feature={layerRoadmark}  />
                     </TabPanel>
-                    <TabList sx={{ height: '50px' }} onChange={handleChange} aria-label="lab API tabs example" variant="scrollable" scrollButtons="auto">
+                    <Divider />
+                    <TabList sx={{ height: '50px', backgroundColor:'white' }} onChange={handleChange} aria-label="lab API tabs example" variant="scrollable" scrollButtons="auto">
                         <Tab label="Laneside" value="1" />
                         <Tab label="Link" value="2" />
                         <Tab label="Node" value="3" />

@@ -1,4 +1,4 @@
-import { IconButton, ListItem, ListItemIcon, ListItemText, SvgIcon } from "@mui/material";
+import { IconButton, ListItem, ListItemIcon, ListItemText, SvgIcon, Typography } from "@mui/material";
 import { useEffect } from "react";
 import { Rnd } from "react-rnd";
 import { featureService } from "../service/message.service";
@@ -35,7 +35,6 @@ function FeatureTable({ source, wrapRef, title, layer }) {
         >
             <Rnd minWidth={630} minHeight={400} bounds="body" default={{ x: 200, y: 0, width: 200, height: 200, }} style={style} dragHandleClassName="featureHandle">
                 <div className="featureHandle" style={{ width: '100%', display: "flex", cursor: "move", backgroundColor: "#30459A" }}>
-
                     <ListItem sx={{ paddingTop: '3px', paddingBottom: '3px' }}>
                         <ListItemIcon sx={{ fontSize: 10, minWidth: '30px' }}>
                             <SvgIcon sx={{ fill: '#fff', width: '20px' }}>
@@ -43,14 +42,16 @@ function FeatureTable({ source, wrapRef, title, layer }) {
                             </SvgIcon>
                         </ListItemIcon>
                         <ListItemText sx={{ color: "#fff" }}>
-                            {title}
+                            <Typography variant="subtitle2">
+                                {title}
+                            </Typography>
                         </ListItemText>
                         <IconButton onClick={tableClose}>
                             <CloseIcon fontSize="small" sx={{ fill: '#fff' }} />
                         </IconButton>
                     </ListItem>
                 </div>
-                <div style={{ flexGrow: 1, width: '100%' }}>
+                <div style={{ flexGrow: 1, width: '100%', padding:'0px' }}>
                     <FeatureItem index={1} source={source} />
                 </div>
             </Rnd>
