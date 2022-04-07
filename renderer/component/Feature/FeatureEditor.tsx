@@ -7,9 +7,10 @@ const style = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 332,
+    width: 334,
+    height:320,
     bgcolor: 'white',
-    border: '2px solid #000',
+    border: '0px',
     boxShadow: 24,
     p: 0,
 };
@@ -41,10 +42,10 @@ function FeatureEditor({ handleClose, open }) {
                     </ListItem>
                 </div>
 
-                <Typography id="modal-modal-title" variant="body2" component="h2" p={3} sx={{ color: "#30459A" }}>
+                <Typography id="modal-modal-title" variant="body2" component="h2" p={2} sx={{ color: "#30459A" }}>
                     "선택된 필드의 속성값을 수정합니다."
                 </Typography>
-                <Typography id="modal-modal-title" variant="h6" sx={{ marginLeft: '20px' }}>
+                <Typography id="modal-modal-title" variant="subtitle1" sx={{ marginLeft: '20px' }}>
                     Field
                 </Typography>
 
@@ -63,14 +64,14 @@ function FeatureEditor({ handleClose, open }) {
                     <MenuItem value={20}>Twenty</MenuItem>
                     <MenuItem value={30}>Thirty</MenuItem>
                 </Select>
-                <Typography id="modal-modal-title" variant="h6" sx={{ marginLeft: '20px', marginTop: '11px' }}>
+                <Typography id="modal-modal-title" variant="subtitle1" sx={{ marginLeft: '20px', marginTop: '11px' }}>
                     Value
                 </Typography>
-                <TextField id="standard-basic" variant="outlined" sx={{ marginLeft: '20px', width: '294px', marginBottom: '27px' }} size="small" />
+                <TextField id="standard-basic" variant="outlined" sx={{ marginLeft: '20px', width: '294px', marginBottom: '17px' }} size="small" />
                 <Divider />
-                <div style={{textAlign:'right'}}>
+                <div style={{textAlign:'right', padding:0}}>
 
-                    <Button variant="outlined" href="#outlined-buttons" sx={{ marginLeft: '20px', marginTop: '20px', marginBottom: '20px', marginRight:'8px' , width:'80px'}}>
+                    <Button variant="outlined" href="#outlined-buttons" sx={{ marginLeft: '20px', marginTop: '10px', marginBottom: '10px', marginRight:'8px' , width:'80px'}}>
                         확인
                     </Button>
                     <Button variant="outlined" href="#outlined-buttons" sx={{marginRight:'20px', width:'80px'}} color="error" onClick={handleClose}>

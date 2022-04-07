@@ -49,10 +49,23 @@ function HdMap({ children, zoom, center }) {
             },
         });
         select.on("select", (e) => {
+            console.log(e);
             let features = e.selected as any[];
             featureService.selected("selected", features);
+
+            let stopIDS = []; 
+            features.forEach((feature)=>{
+                if(feature.get("group")==="LAYER_ROADMARK" && feature.get("Type")===7){
+                    stopIDS.push(feature);
+                }
+            });
+            if(stopIDS.length>0){
+                featureService.stopLineIdSelected("stopIDSSelected", stopIDS,select);
+            }
         });
-  
+        const snap = new Snap({
+
+        })
         const modify = new Modify({
             deleteCondition: altKeyOnly,
             features: select.getFeatures(),
@@ -93,6 +106,7 @@ function HdMap({ children, zoom, center }) {
         });
 
         mapObject.addInteraction(select);
+        // mapObject.addInteraction(snap);
         mapObject.addInteraction(modify);
         mapObject.addInteraction(dragBox);
         mapObject.setTarget(mapRef.current);

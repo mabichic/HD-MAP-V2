@@ -4,9 +4,10 @@ import HdMap from '../component/HdMap';
 import { layerState } from '../state/Layer';
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
-import VworldTileLayer from '../component/VworldTileLayer';
+import VworldTileLayer from '../component/layer/VworldTileLayer';
 import Layers from '../component/Layers';
 import ConfirmDialog from '../component/ConfirmDialog';
+import Loading from '../component/Loading';
 const Store = require('electron-store');
 
 const store = new Store();
@@ -33,6 +34,7 @@ function Home() {
         <Layers>
         </Layers>
         <ConfirmDialog/>
+        <Loading/>
       </HdMap> 
   );
 };

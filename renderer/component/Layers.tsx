@@ -98,6 +98,7 @@ function Layers({ children }) {
       <TestButton layers={layers} />
       <div ref={wrapRef}>
         {showTableLayers.map((layer) => {
+          console.log(layer.getSource());
           return <FeatureTable key={layer.get('title')} source={layer.getSource()} wrapRef={wrapRef} title={layer.get('title')} layer={layer} />
         })}
       </div>

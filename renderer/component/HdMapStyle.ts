@@ -5,6 +5,7 @@ import Stroke from 'ol/style/Stroke';
 import Circle from 'ol/style/Circle'
 import Point from "ol/geom/Point";
 import { LineString, MultiPoint } from "ol/geom";
+import CircleStyle from "ol/style/Circle";
 const HdMapStyle = function(feature, resolution) {
     var zoom = Math.log2(156543.03390625) - Math.log2(resolution);
 
@@ -50,15 +51,32 @@ const HdMapStyle = function(feature, resolution) {
     if(feature.get('group') === 'LAYER_LN_NODE'){
         if(zoom<19) return null;
         
-        return new Style({
-            image: new Circle({
-                radius: 5,
-                fill: new Fill({
-                color: '#FFFF00',
-                }),
-            }),
-        });
+        // return new Style({
+        //     image: new Circle({
+        //         radius: 5,
+        //         fill: new Fill({
+        //         color: '#FFFF00',
+        //         }),
+        //     }),
+        // });
         
+        return new Style({
+            fill: new Fill({
+                color: 'rgba(255, 255, 255, 0.2)',
+              }),
+              stroke: new Stroke({
+                color: '#ffcc33',
+                width: 2,
+              }),
+              image: new CircleStyle({
+                radius: 7,
+                fill: new Fill({
+                  color: '#FFFF00',
+                }),
+              }),
+              zIndex:1000,
+        });
+
     }
     if(feature.get('group') === 'LAYER_LN_LINK'){
         if(zoom<19) return null;

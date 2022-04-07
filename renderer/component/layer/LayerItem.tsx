@@ -18,6 +18,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import TocIcon from '@mui/icons-material/Toc';
 import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
 import MapContext from "../context/MapContext";
+import { Select } from "ol/interaction";
 const Warp = styled(Box)({
     display: "inline-block", width: '100%', textAlign: 'left', padding: '10px', marginBottom: '17px', paddingRight: '20px', paddingLeft: '20px'
 });
@@ -57,6 +58,18 @@ export default function LayerItem({ item }) {
     }
     const edtiorSwitch = (e) => {
         item.set("selectable", e.target.checked);
+
+        let select;
+        map.getInteractions().forEach((interaction) => {
+            if (interaction instanceof Select) {
+                select = interaction;
+            }
+        });
+        // select.getFeatures();
+        if (!e.target.checked) {
+            select.getFeatures().clear();
+            featureService.selected("selected", []);
+        }
         setEditor(e.target.checked);
     }
     const opacitySwitch = (e) => {
@@ -87,6 +100,13 @@ export default function LayerItem({ item }) {
         // map.removeLayer(item);
         const dellLayer = () => {
             layerService.layerSort('layerDelete', item);
+            let select;
+            map.getInteractions().forEach((interaction) => {
+                if (interaction instanceof Select) {
+                    select = interaction;
+                }
+            });
+            select.getFeatures().clear();
         }
         confrimService.sendMessage("레이어 제거", item.get('title') + " 레이어를 정말 제거 하시겠습니까? \n\r 저장하지 않은 데이터는 손실됩니다. ", dellLayer, null);
 

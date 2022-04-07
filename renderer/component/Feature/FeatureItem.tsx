@@ -1,4 +1,4 @@
-import { SyntheticEvent, useContext, useEffect, useState } from "react";
+import { ReactNode, SyntheticEvent, useContext, useEffect, useState } from "react";
 import { featureService } from "../service/message.service";
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
@@ -7,9 +7,41 @@ import { Divider, FormControlLabel, Radio, RadioGroup, Tab, Tabs } from "@mui/ma
 import FeatureGrid from "./FeatureGrid";
 import { Feature } from "ol";
 import { Select } from "ol/interaction";
-import { TabContext, TabList, TabPanel } from "@mui/lab";
+import VectorSource from "ol/source/Vector";
+import { LayerLanesideHader } from "./header/Laneside";
+import { LayerLnLinkHader } from "./header/Link";
+import { LayerLnNodeHader } from "./header/Node";
+import { LayerPOIHader } from "./header/Poi";
+import { LayerRoadlightHader } from "./header/Roadlight";
+import { LayerRoadmarkHader } from "./header/RoadMark";
 
-
+interface TabPanelProps {
+    children?: ReactNode;
+    index: number;
+    value: number;
+    feature: Array<any>;
+    source: VectorSource;
+    header: Array<any>;
+}
+function TabPanel(props: TabPanelProps) {
+    const { children, value, index, feature, source, header, ...other } = props;
+    return (
+        <div
+            role="tabpanel"
+            hidden={value !== index}
+            id={`simple-tabpanel-${index}`}
+            aria-labelledby={`simple-tab-${index}`}
+            {...other}
+            style={{ flexGrow: 1, padding: '0px' }}
+        >
+            {value === index && (
+                <FeatureGrid feature={feature} source={source}
+                    columnDefs={header}
+                />
+            )}
+        </div>
+    );
+}
 
 export default function FeatureItem({ index, source }) {
 
@@ -26,8 +58,8 @@ export default function FeatureItem({ index, source }) {
     const [filter, setFilter] = useState([]);
     const [viewer, setViewer] = useState('all');
 
-    const [value, setValue] = useState('1');
-    
+    const [value, setValue] = useState(1);
+
     const init = () => {
         let layer_laneside = [];
         let layer_ln_link = [];
@@ -60,6 +92,7 @@ export default function FeatureItem({ index, source }) {
     }
     const update = (features: Array<Feature>) => {
         let selectedFeatureIDS = [];
+        console.log(features);
         features.forEach((feature) => {
             selectedFeatureIDS.push(feature.getId());
         })
@@ -129,45 +162,59 @@ export default function FeatureItem({ index, source }) {
         if (e.target.value === "all") init();
     }
 
-    const handleChange = (event: SyntheticEvent, newValue: string) => {
+    const handleChange = (event: SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
 
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }} >
-            <div style={{ height: '50px' , backgroundColor:'white', padding:'0px'}}>
+            <div style={{ height: '50px', backgroundColor: 'white', padding: '0px' }}>
                 <RadioGroup
                     row
                     aria-labelledby="demo-row-radio-buttons-group-label"
                     name="row-radio-buttons-group"
                     value={viewer}
                     onChange={viewerChange}
-                    sx={{paddingLeft:'20px'}}
+                    sx={{ paddingLeft: '20px' }}
                 >
-                    <FormControlLabel value="all" control={<Radio />} label="모두보기"/>
+                    <FormControlLabel value="all" control={<Radio />} label="모두보기" />
                     <FormControlLabel value="selected" control={<Radio />} label="선택된 객체만 보기" />
                 </RadioGroup>
                 <Divider />
             </div>
             <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                <TabContext value={value}>
+                <TabPanel value={value} index={1} feature={layerLaneside} source={source} header={LayerLanesideHader} />
+                <TabPanel value={value} index={2} feature={layerLnLink} source={source} header={LayerLnLinkHader} />
+                <TabPanel value={value} index={3} feature={layerLnNode} source={source} header={LayerLnNodeHader} />
+                <TabPanel value={value} index={4} feature={layerPoi} source={source} header={LayerPOIHader} />
+                <TabPanel value={value} index={5} feature={layerRoadlight} source={source} header={LayerRoadlightHader} />
+                <TabPanel value={value} index={6} feature={layerRoadmark} source={source} header={LayerRoadmarkHader} />
+                <Tabs value={value} sx={{ backgroundColor: 'white' }} onChange={handleChange}>
+                    <Tab label="Laneside" value={1} />
+                    <Tab label="Link" value={2} />
+                    <Tab label="Node" value={3} />
+                    <Tab label="Poi" value={4} />
+                    <Tab label="Roadlight" value={5} />
+                    <Tab label="Roadmark" value={6} />
+                </Tabs>
+                {/* <TabContext value={value}>
                     <TabPanel sx={{ flexGrow: 1, padding: '0px' }} value="1">
-                            <FeatureGrid feature={layerLaneside}/>
+                            <FeatureGrid feature={layerLaneside} source={source}/>
                     </TabPanel>
                     <TabPanel sx={{ flexGrow: 1, padding: '0px' }} value="2">
-                            <FeatureGrid feature={layerLnLink} />
+                            <FeatureGrid feature={layerLnLink} source={source}/>
                     </TabPanel>
                     <TabPanel sx={{ flexGrow: 1, padding: '0px' }} value="3">
-                            <FeatureGrid feature={layerLnNode} />
+                            <FeatureGrid feature={layerLnNode} source={source}/>
                     </TabPanel>
                     <TabPanel sx={{ flexGrow: 1, padding: '0px' }} value="4">
-                            <FeatureGrid feature={layerPoi} />
+                            <FeatureGrid feature={layerPoi} source={source}/>
                     </TabPanel>
                     <TabPanel sx={{ flexGrow: 1, padding: '0px' }} value="5">
-                            <FeatureGrid feature={layerRoadlight} />
+                            <FeatureGrid feature={layerRoadlight} source={source}/>
                     </TabPanel>
                     <TabPanel sx={{ flexGrow: 1, padding: '0px' }} value="6">
-                            <FeatureGrid feature={layerRoadmark}  />
+                            <FeatureGrid feature={layerRoadmark}  source={source}/>
                     </TabPanel>
                     <Divider />
                     <TabList sx={{ height: '50px', backgroundColor:'white' }} onChange={handleChange} aria-label="lab API tabs example" variant="scrollable" scrollButtons="auto">
@@ -178,7 +225,7 @@ export default function FeatureItem({ index, source }) {
                         <Tab label="Roadlight" value="5" />
                         <Tab label="Roadmark" value="6" />
                     </TabList>
-                </TabContext>
+                </TabContext> */}
 
             </div>
         </div >
