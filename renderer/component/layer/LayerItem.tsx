@@ -109,8 +109,6 @@ export default function LayerItem({ item }) {
             select.getFeatures().clear();
         }
         confrimService.sendMessage("레이어 제거", item.get('title') + " 레이어를 정말 제거 하시겠습니까? \n\r 저장하지 않은 데이터는 손실됩니다. ", dellLayer, null);
-
-
     }
 
     const saveLayer = (event: MouseEvent<HTMLButtonElement>) => {

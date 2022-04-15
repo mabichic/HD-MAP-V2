@@ -41,7 +41,7 @@ export default function Converter(layerNM: "LAYER_LANESIDE" | "LAYER_LN_LINK" | 
       array = array.trim();
       if (array === "") return;
       let obj = new objectSet[layerNM](array);
-
+      obj.Index = index;
       let geson: GEOJSONTYPE = {
         type: "Feature",
         group: layerNM,

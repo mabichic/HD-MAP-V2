@@ -10,7 +10,7 @@ import FeatureEditor from "./FeatureEditor";
 interface FeatureGridProps {
     feature: Array<any>;
     source: VectorSource;
-    columnDefs : Array<any>;
+    columnDefs: Array<any>;
 }
 
 export default function FeatureGrid({ feature, source, columnDefs }: FeatureGridProps) {
@@ -26,23 +26,54 @@ export default function FeatureGrid({ feature, source, columnDefs }: FeatureGrid
     let subscription = null;
 
     const getRowNodeId = (params) => {
-        return params.data.ID;
+        return params.data.featureID;
     };
     const defaultColDef = useMemo(() => {
         return {
-          flex: 1,
-          filter: true,
-          editable: true,
-          minWidth: 150,
+            flex: 1,
+            filter: true,
+            editable: true,
+            minWidth: 150,
         };
-      }, []);
+    }, []);
     useEffect(() => {
         loadingService.sendMessage(true);
         return () => {
-            console.log("컴포넌트 클린업");
-            setGridApi(null);
-        }
+            loadingService.sendMessage(false);
+        };
     }, [])
+
+    useEffect(() => {
+        if(gridRef.current===null) return;
+        // let subscription = featureService.getMessage().subscribe(message => {
+        //     if (message.state === "featureChange") {
+        //         console.log(message);
+        //         message.features.forEach((fea)=>{
+        //             // console.log(source.getFeatureById(fea.getId()));
+        //             // console.log(gridRef.current.api.getRowNode(fea.getId()));
+        //             let rowNode = gridRef.current.api.getRowNode(fea.getId());
+        //             if(typeof rowNode === 'undefined') return ; 
+        //             rowNode.setDataValue('PointXY', fea.getGeometry().getFlatCoordinates());
+        //             if(fea.getGeometry().getType()!=="Point"){
+        //                 rowNode.setDataValue('NumPoint', fea.get("NumPoint"));
+        //             }
+        //             columnDefs.forEach((field)=>{
+        //                 console.log(field.field);
+        //                 if(field.field==="LinkID")  rowNode.setDataValue('LinkID', fea.get("LinkID"));
+        //                 if(field.field==="NumConLink")  rowNode.setDataValue('NumConLink', fea.get("NumConLink"));
+        //                 if(field.field==="SNodeID")  rowNode.setDataValue('SNodeID', fea.get("SNodeID"));
+        //                 if(field.field==="ENodeID")  rowNode.setDataValue('ENodeID', fea.get("ENodeID"));
+        //             });
+        //             console.log(columnDefs);
+        //         });
+        //     }
+
+        // });
+        return () => {
+            // subscription.unsubscribe();
+        };
+    }, [gridRef])
+
 
     const zoomToFeatures = () => {
         let feautes = [];
@@ -81,27 +112,38 @@ export default function FeatureGrid({ feature, source, columnDefs }: FeatureGrid
         return 0;
     });
 
-    const onCellEditingStarted  = (params) =>{
-        if(params.colDef.field==="StopLineID"){
+    const onCellEditingStarted = (params) => {
+        if (params.colDef.field === "StopLineID") {
             subscription = featureService.getMessage().subscribe(message => {
-                if(message.state==="stopIDSSelected"){
-                    if(source.getFeatureByUid(message.features[0].ol_uid)!==null){
-                        if(!params.value.includes(params.value)){
+                if (message.state === "stopIDSSelected") {
+                    if (source.getFeatureByUid(message.features[0].ol_uid) !== null) {
+                        if (!params.value.includes(params.value)) {
                             params.value.push(message.features[0].get("ID"));
                             params.api.stopEditing();
                             params.api.refreshCells();
                             subscription.unsubscribe();
                             message.select.getFeatures().clear();
-                        }else{
+                        } else {
                             // console.log("중복된 객체");
                         }
-                    }else{
+                    } else {
                         // console.log("객체 음슴");
-                    }       
+                    }
                 }
             });
         }
     }
+    const onCellEditingStopped = (e) => {
+        if (e.oldValue === e.newValue) return;
+        const dataId = e.colDef.field === "ID" ? e.oldValue : e.node.data.ID;
+        const data = { field: e.colDef.field, data: e.newValue };
+        let feature = source.getFeatureById(e.data.featureID);
+        feature.set(e.colDef.field, e.newValue);
+        console.log(feature);
+        console.log(e);
+        // mapService.changeObject(dataKey, dataId, data);
+    };
+
     return (
 
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -120,9 +162,10 @@ export default function FeatureGrid({ feature, source, columnDefs }: FeatureGrid
                     columnDefs={columnDefs}
                     // onRowSelected={onRowSelected}
                     onGridReady={onGridReady}
-                    // ref={gridRef}
-                    // getRowId={getRowNodeId}
+                    ref={gridRef}
+                    getRowId={getRowNodeId}
                     onCellEditingStarted={onCellEditingStarted}
+                    onCellEditingStopped={onCellEditingStopped}
                 />
             </div>
 

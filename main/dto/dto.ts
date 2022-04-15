@@ -100,6 +100,7 @@ export class LAYER_LANESIDE implements LAYER_LANESIDE_PROPERTIE {
   NumPoint: number;
   PointXY: Array<Array<number>>;
   group: "LAYER_LANESIDE";
+  Index:number;
   constructor(array) {
     this.ID = Number(array.split(" ")[0]);
     this.MID = Number(array.split(" ")[1]);
@@ -136,6 +137,7 @@ export class LAYER_LN_LINK implements LAYER_LN_LINK_PROPERTIE {
   NumPoint: number;
   PointXY: Array<Array<number>>;
   group: "LAYER_LN_LINK";
+  Index:number;
   constructor(array) {
     this.ID = Number(array.split(" ")[0]);
     this.MID = Number(array.split(" ")[1]);
@@ -169,6 +171,7 @@ export class LAYER_LN_NODE implements LAYER_LN_NODE_PROPERTIE {
   LinkID: Array<number> | null;
   PointXY: Array<number>;
   group: "LAYER_LN_NODE";
+  Index:number;
   constructor(array) {
     let numConLink = Number(array.split(" ")[1]);
     let linkId = [];
@@ -193,6 +196,7 @@ export class LAYER_POI implements LAYER_POI_PROPERTIE {
   Name: string;
   PointXY: Array<number>;
   group: "LAYER_POI";
+  Index:number;
   constructor(array) {
     this.ID = Number(array.split(" ")[0]);
     this.LinkID = Number(array.split(" ")[1]);
@@ -213,6 +217,7 @@ export class LAYER_ROADLIGHT implements LAYER_ROADLIGHT_PROPERTIE {
   NumPoint: number;
   PointXY: Array<Array<number>>;
   group: "LAYER_ROADLIGHT";
+  Index:number;
   constructor(array) {
     let numStopline = Number(array.split(" ")[5]);
     let stoplineID = [];
@@ -247,6 +252,7 @@ export class LAYER_ROADMARK implements LAYER_ROADMARK_PROPERTIE {
   NumPoint: number;
   ID: number;
   group: "LAYER_ROADMARK";
+  Index:number;
   constructor(array) {
     let numStopline = Number(array.split(" ")[3]);
     let stoplineID = [];

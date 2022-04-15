@@ -11,7 +11,7 @@ import VectorSource from "ol/source/Vector";
 import { LayerLanesideHader } from "./header/Laneside";
 import { LayerLnLinkHader } from "./header/Link";
 import { LayerLnNodeHader } from "./header/Node";
-import { LayerPOIHader } from "./header/Poi";
+import { LayerPOIHader } from "./header/POI";
 import { LayerRoadlightHader } from "./header/Roadlight";
 import { LayerRoadmarkHader } from "./header/RoadMark";
 
@@ -139,16 +139,59 @@ export default function FeatureItem({ index, source }) {
         }
 
     }, [viewer])
-
     useEffect(() => {
         let subscription = featureService.getMessage().subscribe(message => {
+            if (message.state === "selected") {
+                if (viewer === "selected") {
+                    let select;
+                    map.getInteractions().forEach((interaction) => {
+                        if (interaction instanceof Select) {
+                            select = interaction;
+                        }
+                    });
+                    update(select.getFeatures());
 
-            if (message) {
-                if (viewer === "selected" && message.state === "selected") {
-                    update(message.features);
+                }
+            }
+            if (message.state === "featureChange") {
+                if (viewer === "all") init();
+                else if (viewer === "selected") {
+                    let select;
+                    map.getInteractions().forEach((interaction) => {
+                        if (interaction instanceof Select) {
+                            select = interaction;
+                        }
+                    });
+                    update(select.getFeatures());
+
                 }
             }
         });
+        // let subscription = featureService.getMessage().subscribe(message => {
+        //     if (message.state === "featureChange") {
+        //         console.log(message);
+        //         message.features.forEach((fea)=>{
+        //             // console.log(source.getFeatureById(fea.getId()));
+        //             // console.log(gridRef.current.api.getRowNode(fea.getId()));
+        //             let rowNode = gridRef.current.api.getRowNode(fea.getId());
+        //             if(typeof rowNode === 'undefined') return ; 
+        //             rowNode.setDataValue('PointXY', fea.getGeometry().getFlatCoordinates());
+        //             if(fea.getGeometry().getType()!=="Point"){
+        //                 rowNode.setDataValue('NumPoint', fea.get("NumPoint"));
+        //             }
+        //             columnDefs.forEach((field)=>{
+        //                 console.log(field.field);
+        //                 if(field.field==="LinkID")  rowNode.setDataValue('LinkID', fea.get("LinkID"));
+        //                 if(field.field==="NumConLink")  rowNode.setDataValue('NumConLink', fea.get("NumConLink"));
+        //                 if(field.field==="SNodeID")  rowNode.setDataValue('SNodeID', fea.get("SNodeID"));
+        //                 if(field.field==="ENodeID")  rowNode.setDataValue('ENodeID', fea.get("ENodeID"));
+        //             });
+        //             console.log(columnDefs);
+        //         });
+        //     }
+
+        // });
+
         return () => {
             subscription.unsubscribe();
         };

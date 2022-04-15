@@ -1,5 +1,7 @@
+import { Snap } from "ol/interaction";
 import VectorLayer from "ol/layer/Vector";
 import VectorImageLayer from "ol/layer/VectorImage";
+import {Vector} from 'ol/layer';
 
 const HdMapVectorLayer = ({ source, style, title, zIndex = 0, map }) => {
   // let vectorLayer = new VectorImageLayer({
@@ -13,20 +15,26 @@ const HdMapVectorLayer = ({ source, style, title, zIndex = 0, map }) => {
   //   },
   //   zIndex: map.getLayers().getLength(),
   // });
-
-  let vectorLayer = new VectorLayer({
+  
+  let snap = new Snap({
+    source: source
+  });
+  let vectorLayer = new Vector({
     style:style,
-    declutter: true,
+    // declutter: true,
     source: source,
     properties : {
       title:title,
       selectable: false,
       dataVisible: false,
+      snap : snap
     }, 
     zIndex : map.getLayers().getLength(),
   });
   map.addLayer(vectorLayer);
 
+
+  map.addInteraction(snap);
   return vectorLayer;
 };
 

@@ -7,13 +7,11 @@ import HdMapVectorLayer from "./layer/HdMapVectorLayer";
 import TestButton from "./TestButton";
 import MapContext from "./context/MapContext";
 import { featureService, layerService } from './service/message.service';
-import Tables from "./Tables";
-import VectorImageLayer from "ol/layer/VectorImage";
 import TileLayer from "ol/layer/Tile";
 import VworldTileLayer from "./layer/VworldTileLayer";
 import FeatureTable from "./Feature/FeatureTable";
 
-function compare(a: TileLayer<any> | VectorImageLayer<any>, b: TileLayer<any> | VectorImageLayer<any>) {
+function compare(a: TileLayer<any>, b: TileLayer<any>) {
   return b.getZIndex() - a.getZIndex()
 }
 
@@ -29,6 +27,9 @@ function Layers({ children }) {
       let features = new GeoJSON().readFeatures(args);
       let source = new VectorSource({
         features: features
+      });
+      features.forEach(feature=>{
+        feature.set("source", source);
       });
       setLayers(layers => [...layers, HdMapVectorLayer({ zIndex: map.getLayers().getLength(), map: map, source: source, style: HdMapStyle, title: 'Layer Set ' + args.index })].sort(compare));
     });
@@ -63,6 +64,7 @@ function Layers({ children }) {
         tempLayers = tempLayers.filter((layer) => {
           return layer != message.layer;
         });
+        map.removeInteraction(message.layer.get("snap"));
         map.removeLayer(message.layer);
         setShowTableLayers((layers)=>layers.filter((layer)=>{
           return layer != message.layer;
