@@ -9,7 +9,9 @@ const typeMappings = {
   5: "JUN_U",
   6: "POCKET_L",
   7: "POCKET_R",
-  8: "JUN_UNPROTECTED_L",
+  8: "JUN_UNPROTECTED_S",
+  9: "JUN_UNPROTECTED_L",
+  10: "JUN_UNPROTECTED_R",
 };
 const subTypeMappings = {
   0: "TYPE_NONE",

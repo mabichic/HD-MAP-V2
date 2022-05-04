@@ -6,7 +6,7 @@ import HdMapStyle from "./HdMapStyle";
 import HdMapVectorLayer from "./layer/HdMapVectorLayer";
 import TestButton from "./TestButton";
 import MapContext from "./context/MapContext";
-import { featureService, layerService } from './service/message.service';
+import { featureService, layerService, loadingService } from './service/message.service';
 import TileLayer from "ol/layer/Tile";
 import VworldTileLayer from "./layer/VworldTileLayer";
 import FeatureTable from "./Feature/FeatureTable";
@@ -24,6 +24,8 @@ function Layers({ children }) {
     if (!map) return;
     setLayers([VworldTileLayer({ zIndex: 0, map: map })]);
     ipcRenderer.on("load", (event, args) => {
+      
+        
       let features = new GeoJSON().readFeatures(args);
       let source = new VectorSource({
         features: features
@@ -31,7 +33,12 @@ function Layers({ children }) {
       features.forEach(feature=>{
         feature.set("source", source);
       });
-      setLayers(layers => [...layers, HdMapVectorLayer({ zIndex: map.getLayers().getLength(), map: map, source: source, style: HdMapStyle, title: 'Layer Set ' + args.index })].sort(compare));
+      source.on("addfeature", (e)=>{ 
+        featureService.selected("featureAppend");
+      });
+
+      setLayers(layers => [...layers, HdMapVectorLayer({ zIndex: map.getLayers().getLength()-1, map: map, source: source, style: HdMapStyle, title: 'Layer Set ' + args.index, layerIndex : args.index })].sort(compare));
+      loadingService.sendMessage(false);
     });
     return () => {
       ipcRenderer.removeAllListeners("load");

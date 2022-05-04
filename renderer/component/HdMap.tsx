@@ -1,29 +1,42 @@
+import { Map, Overlay, View } from 'ol';
 import 'ol/ol.css';
-import { Feature, Map, Overlay, View } from 'ol';
 import { useEffect, useRef, useState } from 'react';
 import MapContext from './context/MapContext';
 
-import proj4 from 'proj4';
-import { register } from 'ol/proj/proj4';
-import { Draw, Modify, Select, Translate } from 'ol/interaction';
-import { selectedStyle } from './HdMapStyle';
-import { defaults as defaultInteraction, DragBox, Snap, } from 'ol/interaction'
-import { altKeyOnly, platformModifierKeyOnly, primaryAction } from 'ol/events/condition';
-import { featureService } from './service/message.service';
-import VectorImageLayer from 'ol/layer/VectorImage';
-import { Box, IconButton, Paper, styled, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+import { Box, IconButton, styled, TableCell, Typography } from '@mui/material';
+import { ipcRenderer } from 'electron';
+import { click, platformModifierKeyOnly, primaryAction } from 'ol/events/condition';
+import GeoJSON from 'ol/format/GeoJSON';
+import { defaults as defaultInteraction, DragBox, Modify, Select, Snap, Translate } from 'ol/interaction';
+import { Vector } from 'ol/layer';
+import { register } from 'ol/proj/proj4';
+import VectorSource from 'ol/source/Vector';
+import CircleStyle from 'ol/style/Circle';
+import Fill from 'ol/style/Fill';
+import Stroke from 'ol/style/Stroke';
+import Style from 'ol/style/Style';
+import proj4 from 'proj4';
 import styles from './HdMap.module.css';
-import Popup from './Popup';
-import { fromLonLat } from 'ol/proj';
-import { LineString, Point, Polygon } from 'ol/geom';
-import { Coordinate } from 'ol/coordinate';
+import { selectedStyle } from './HdMapStyle';
+import BoxEnd from './modify/BoxEnd';
+import DeleteFeature from './modify/Delete';
+import { MeasureCancle, MeasureClear, MeasureInit, MeasureStart } from './modify/Measure';
 import ModifyEnd from './modify/ModifyEnd';
+import { setModifyStartUndo, setRedo, setUndo } from './modify/UndoRedo';
+import { alertService, featureCopyService, featureService, selectService } from './service/message.service';
 proj4.defs([
     ['EPSG:5186', '+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=600000 +epllps']
 ]);
 proj4.defs("EPSG:5186", "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=600000 +ellps=GRS80 +units=m +no_defs"); // 5186 좌표선언
 register(proj4);
+
+export const MOVE = "MOVE";
+export const EDIT = "EDIT";
+export const DRAW = "DRAW";
+let modifyKeyDown = false;
+
+let clipboardData = null;
 const PopupTableCell = styled(TableCell)({
     borderBottom: "none",
     padding: '3px',
@@ -57,6 +70,9 @@ const PopupValueHeaderTableCell = styled(PopupTableCell)({
 
 function HdMap({ children, zoom, center }) {
     const [map, setMap] = useState(null);
+    const [select, setSelect] = useState<null | Select>(null);
+    const [modify, setModify] = useState(null);
+    const [measureSource, setMeasureSource] = useState(null);
     const mapRef = useRef(null);
     const overlayRef = useRef(null);
     const closerRef = useRef(null);
@@ -82,7 +98,6 @@ function HdMap({ children, zoom, center }) {
                 doubleClickZoom: false, keyboard: false,
             }),
         };
-        const pos = fromLonLat([16.3725, 48.208889]);
         const overlay = new Overlay({
             element: overlayRef.current,
             autoPan: true,
@@ -90,9 +105,33 @@ function HdMap({ children, zoom, center }) {
                 duration: 250,
             }
         })
+        const source = new VectorSource();
+
+        const vector = new Vector({
+            zIndex: 10000,
+            source: source,
+            style: new Style({
+                fill: new Fill({
+                    color: 'rgba(255, 255, 255, 0.2)',
+                }),
+                stroke: new Stroke({
+                    color: '#ffcc33',
+                    width: 2,
+                }),
+                image: new CircleStyle({
+                    radius: 7,
+                    fill: new Fill({
+                        color: '#ffcc33',
+                    }),
+                }),
+            }),
+        });
 
 
+        setMeasureSource(source);
         let mapObject = new Map(options);
+        mapObject.set("state", MOVE);
+        mapObject.addLayer(vector);
         mapObject.addOverlay(overlay);
         setOverlay(overlay);
         mapObject.getViewport().addEventListener('contextmenu', function (evt) {
@@ -100,8 +139,6 @@ function HdMap({ children, zoom, center }) {
             const coordinate = mapObject.getEventCoordinate(evt);
             const pixel = mapObject.getPixelFromCoordinate(coordinate);
             const feature = mapObject.forEachFeatureAtPixel(pixel, function (feature) {
-
-                console.log(feature);
                 return feature;
             }, {
                 layerFilter: function (filterLayer) {
@@ -136,9 +173,10 @@ function HdMap({ children, zoom, center }) {
                 return selectedStyle(feature);
             },
         });
+        setSelect(select);
         select.on("select", (e) => {
+            if (modifyKeyDown) return;
             let features = e.selected as any[];
-            featureService.selected("selected", features);
 
             let stopIDS = [];
             features.forEach((feature) => {
@@ -149,16 +187,22 @@ function HdMap({ children, zoom, center }) {
             if (stopIDS.length > 0) {
                 featureService.stopLineIdSelected("stopIDSSelected", stopIDS, select);
             }
+            if (select.getFeatures().getLength() > 0) featureService.selected("selected", features);
         });
-        const snap = new Snap({
-
-        })
+        let snap = new Snap({
+            source: vector.getSource()
+        });
         const modify = new Modify({
-            // deleteCondition: altKeyOnly,
+            deleteCondition: (e) => {
+                if(!modifyKeyDown)  return;
+                return click(e) && modifyKeyDown;
+            },
             features: select.getFeatures(),
         });
+        setModify(modify);
         modify.on("modifystart", (e) => {
             overlay.setPosition(undefined);
+            setModifyStartUndo(e.features);
         });
         modify.on("modifyend", (e) => { ModifyEnd(e) });
 
@@ -167,52 +211,34 @@ function HdMap({ children, zoom, center }) {
             condition: function (event) {
                 return primaryAction(event) && platformModifierKeyOnly(event);
             },
-            features : select.getFeatures(),
+            features: select.getFeatures(),
         })
-        translate.on("translateend",(e)=>{ModifyEnd(e)});
+        translate.on("translatestart", (e) => {
+            overlay.setPosition(undefined);
+            setModifyStartUndo(e.features);
+        });
+        translate.on("translateend", (e) => { ModifyEnd(e) });
         const dragBox = new DragBox({
             condition: platformModifierKeyOnly,
         });
-        dragBox.on('boxend', function () {
-            const selectedFeatures = select.getFeatures();
-            selectedFeatures.clear();
-            const rotation = mapObject.getView().getRotation();
-            const oblique = rotation % (Math.PI / 2) !== 0;
-            const candidateFeatures = oblique ? [] : selectedFeatures;
-            const extent = this.getGeometry().getExtent();
-            mapObject.getLayers().forEach((layer: VectorImageLayer<any>) => {
-                if (layer.get("selectable")) {
-                    layer.getSource().forEachFeatureIntersectingExtent(extent, function (feature) {
-                        candidateFeatures.push(feature);
-                    });
-                }
-            });
-            featureService.selected("selected", candidateFeatures);
+        dragBox.on('boxend', (e) => { BoxEnd(e, select, mapObject, dragBox) });
 
-            if (oblique) {
-                const anchor = [0, 0];
-                const geometry = dragBox.getGeometry().clone();
-                geometry.rotate(-rotation, anchor);
-                const extent = geometry.getExtent();
-                candidateFeatures.forEach(function (feature) {
-                    const geometry = feature.getGeometry().clone();
-                    geometry.rotate(-rotation, anchor);
-                    if (geometry.intersectsExtent(extent)) {
-                        this.selectedFeatures.push(feature);
-                    }
-                });
-            }
-        });
-        // const measure = new Draw({
-        //     type
-        // });
+        MeasureInit(mapObject, vector.getSource());
         mapObject.addInteraction(select);
-        // mapObject.addInteraction(snap);
+        mapObject.addInteraction(snap);
         mapObject.addInteraction(modify);
         mapObject.addInteraction(dragBox);
         mapObject.addInteraction(translate);
         mapObject.setTarget(mapRef.current);
         setMap(mapObject);
+        document.addEventListener('keydown', function (evt) {
+            if (modifyKeyDown&&evt.key !== 'd') return;
+            modifyKeyDown = (evt.key === 'd');
+        });
+        document.addEventListener('keyup', function (evt) {
+            if(evt.key !== 'd') return; 
+            modifyKeyDown = (evt.key !== 'd');
+        });
         return () => {
             mapObject.setTarget(undefined);
             mapObject.getLayers().forEach((layer) => {
@@ -229,6 +255,80 @@ function HdMap({ children, zoom, center }) {
         map.getView().setCenter(center)
     }, [center])
 
+    useEffect(() => {
+        if (!map || !measureSource) return;
+        ipcRenderer.on("measureStart", (event, args) => {
+            MeasureStart(map);
+            select.setActive(false);
+            modify.setActive(false);
+        });
+        ipcRenderer.on("measureEnd", (event, args) => {
+            MeasureCancle(map, measureSource);
+            select.setActive(true);
+            modify.setActive(true);
+        });
+        ipcRenderer.on("measureClear", (event, args) => {
+            MeasureClear(map, measureSource);
+        });
+
+        return () => {
+            ipcRenderer.removeAllListeners("measureStart");
+            ipcRenderer.removeAllListeners("measureEnd");
+            ipcRenderer.removeAllListeners("measureClear");
+        }
+    }, [map, measureSource, modify])
+    useEffect(() => {
+        let subscription = selectService.getMessage().subscribe(message => {
+            if (message.state) {
+                select.setActive(true);
+                modify.setActive(true);
+            } else {
+                select.setActive(false);
+                modify.setActive(false);
+            }
+        });
+        ipcRenderer.on("featureCopy", (event, args) => {
+            if (select.getFeatures().getLength() > 0) {
+                let json = new GeoJSON().writeFeaturesObject(select.getFeatures().getArray());
+                clipboardData = json;
+            } else {
+                alertService.sendMessage("Error.", "선택된 객체가 없습니다.");
+            }
+        });
+        ipcRenderer.on("featurePaste", (event, args) => {
+            if (clipboardData !== null) {
+                featureCopyService.copyFeature("copy", clipboardData);
+            } else {
+                alertService.sendMessage("Error.", "복사된 객체가 없습니다.");
+            }
+        });
+        ipcRenderer.on("featureDelete", (event, args) => {
+            if (select.getFeatures().getLength() > 0) {
+                DeleteFeature(select.getFeatures().getArray());
+                select.getFeatures().clear();
+            } else {
+                alertService.sendMessage("Error.", "선택된 객체가 없습니다.");
+            }
+        });
+        ipcRenderer.on("undo", (event, args) => {
+            select.getFeatures().clear();
+            setUndo();
+            dellOverlay();
+        });
+        ipcRenderer.on("redo", (event, args) => {
+            select.getFeatures().clear();
+            setRedo();
+            dellOverlay();
+        });
+        return () => {
+            subscription.unsubscribe();
+            ipcRenderer.removeAllListeners("featureCopy");
+            ipcRenderer.removeAllListeners("featurePaste");
+            ipcRenderer.removeAllListeners("featureDelete");
+            ipcRenderer.removeAllListeners("undo");
+            ipcRenderer.removeAllListeners("redo");
+        }
+    }, [map, select, modify])
     return (
         <MapContext.Provider value={map}>
             <div ref={mapRef} style={{ height: '100%', backgroundColor: 'gray' }} >

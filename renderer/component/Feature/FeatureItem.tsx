@@ -34,11 +34,11 @@ function TabPanel(props: TabPanelProps) {
             {...other}
             style={{ flexGrow: 1, padding: '0px' }}
         >
-            {value === index && (
-                <FeatureGrid feature={feature} source={source}
-                    columnDefs={header}
-                />
-            )}
+            <FeatureGrid
+                feature={feature}
+                source={source}
+                columnDefs={header}
+            />
         </div>
     );
 }
@@ -92,7 +92,6 @@ export default function FeatureItem({ index, source }) {
     }
     const update = (features: Array<Feature>) => {
         let selectedFeatureIDS = [];
-        console.log(features);
         features.forEach((feature) => {
             selectedFeatureIDS.push(feature.getId());
         })
@@ -117,7 +116,6 @@ export default function FeatureItem({ index, source }) {
             pushData(feature, 'LAYER_ROADLIGHT', layer_roadlight);
             pushData(feature, 'LAYER_ROADMARK', layer_roadmark);
         });
-        console.log(layer_laneside);
         setLayerLaneside(layer_laneside);
         setlayerLnLink(layer_ln_link);
         setlayerLnNode(layer_ln_node);
@@ -166,6 +164,10 @@ export default function FeatureItem({ index, source }) {
 
                 }
             }
+            if (message.state === "featureAppend") {
+                if (viewer === "all") init();
+            }
+
         });
         // let subscription = featureService.getMessage().subscribe(message => {
         //     if (message.state === "featureChange") {

@@ -1,24 +1,26 @@
-import { Box, Button, FormControlLabel, FormGroup, FormLabel, IconButton, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Slider, SvgIcon, Switch, Tooltip } from "@mui/material";
-import { borderColor, styled } from "@mui/system";
-import { MouseEvent, useContext, useEffect, useState } from "react";
-import { Rnd } from "react-rnd";
-import FeatureItem from "../Feature/FeatureItem";
-import { confrimService, featureService, layerService } from "../service/message.service";
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import OpacityIcon from '../../public/images/opacity _icon.svg';
-import EditIcon from '@mui/icons-material/Edit';
-import SearchIcon from '@mui/icons-material/Search';
 import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
+import EditIcon from '@mui/icons-material/Edit';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { Box, FormGroup, FormLabel, IconButton, ListItem, ListItemIcon, ListItemText, Menu, MenuItem, Slider, SvgIcon, Switch, Tooltip } from "@mui/material";
+import { styled } from "@mui/system";
+import { MouseEvent, useContext, useEffect, useState } from "react";
+import OpacityIcon from '../../public/images/opacity _icon.svg';
+import { confrimService, featureCopyService, featureService, layerService } from "../service/message.service";
 
 
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import SaveIcon from '@mui/icons-material/Save';
 import TocIcon from '@mui/icons-material/Toc';
 import ZoomInMapIcon from '@mui/icons-material/ZoomInMap';
-import MapContext from "../context/MapContext";
 import { Select } from "ol/interaction";
+import MapContext from "../context/MapContext";
+
+import { ipcRenderer } from "electron";
+import GeoJSON from "ol/format/GeoJSON";
+import { setCopyUndo, setUpUnDoReDoIndex } from "../modify/UndoRedo";
+import { selectService } from "../service/message.service";
 const Warp = styled(Box)({
     display: "inline-block", width: '100%', textAlign: 'left', padding: '10px', marginBottom: '17px', paddingRight: '20px', paddingLeft: '20px'
 });
@@ -40,6 +42,7 @@ const CustomSwitch = styled(Switch)({
     },
 });
 export default function LayerItem({ item }) {
+
     const map = useContext(MapContext);
     const [showTable, setShowTable] = useState(false);
     const [visible, setVisible] = useState(item.getVisible());
@@ -125,7 +128,111 @@ export default function LayerItem({ item }) {
         setAddAnchorEl(null);
     };
 
+    const addObjectItem = (type) => {
+        setAddAnchorEl(null);
+        selectService.selectActive(false);
+        let temp = item.getSource().getFeatures().filter((feature) => {
+            return feature.get("group") === type
+        });
+        let maxID = Math.max.apply(Math, temp.map(function (o) {
+            return o.get("ID");
+        }));
+        item.getSource().get("layerDrawSwitch")(type, maxID, item.get("layerIndex"), item.get("source"));
+    }
+    useEffect(() => {
+        let copySubscription;
+        if (item.get("title") !== "브이월드") {
+            if (item.get("zIndex") === map.getLayers().getLength() - 2) {
+                copySubscription = featureCopyService.getMessage().subscribe(message => {
+                    let features = new GeoJSON().readFeatures(message.features);
+                    let copyFeatures = [];
+                    let updateFeatures = [];
+                    features.forEach((feature) => {
+                        let temp = item.getSource().getFeatures().filter((originFeature) => {
+                            return originFeature.get("group") === feature.get("group")
+                        });
+                        let maxID = Math.max.apply(Math, temp.map(function (o) {
+                            return o.get("ID");
+                        }));
+                        if (!isFinite(maxID)) maxID = 1;
+                        else maxID += 1;
+                        let copyFeature = feature.clone();
+                        let type = copyFeature.get("group");
+                        copyFeature.setId(copyFeature.get("group") + item.get("layerIndex") + "_" + maxID);
+                        copyFeature.set("ID", maxID);
+                        copyFeature.set("Index", item.get("layerIndex"));
+                        copyFeature.set("source", item.getSource());
 
+                        if (type === "LAYER_LN_LINK") {
+                            copyFeature.set('SNodeID', '');
+                            copyFeature.set('ENodeID', '');
+                        } else if (type === "LAYER_LN_NODE") {
+                            copyFeature.set('NumConLink', 0);
+                            copyFeature.set('LinkID', []);
+                        } else if (type === "LAYER_ROADLIGHT" || type === "LAYER_ROADMARK") {
+                            copyFeature.set('NumStopLine', 0);
+                            copyFeature.set('StopLineID', []);
+                        }
+
+                        copyFeatures.push(copyFeature);
+                        item.getSource().addFeature(copyFeature);
+                    });
+                    copyFeatures.forEach((feature) => {
+                        let type = feature.get("group");
+                        let id = feature.get("ID");
+                        if (type === "LAYER_LN_LINK") {
+                            feature.get("source").getFeaturesAtCoordinate(feature.getGeometry().getFirstCoordinate()).forEach(x => {
+                                if (x?.get('group') === 'LAYER_LN_NODE') {
+                                    let linkID = Array.from(new Set([...x.get('LinkID'), id]));
+                                    x.set("LinkID", linkID);
+                                    x.set("NumConLink", x.get('LinkID').length);
+                                    feature.set("SNodeID", x.get("ID"));
+                                }
+                            });
+                            feature.get("source").getFeaturesAtCoordinate(feature.getGeometry().getLastCoordinate()).forEach(x => {
+                                if (x?.get('group') === 'LAYER_LN_NODE') {
+                                    let linkID = Array.from(new Set([...x.get('LinkID'), id]));
+                                    x.set("LinkID", linkID);
+                                    x.set("NumConLink", x.get('LinkID').length);
+                                    feature.set("ENodeID", x.get("ID"));
+                                }
+                            });
+                        } else if (type === "LAYER_LN_NODE") {
+                            feature.get("source").getFeaturesAtCoordinate(feature.getGeometry().getFirstCoordinate()).forEach(x => {
+                                if (x.get('group') === 'LAYER_LN_LINK') {
+                                    var nodePoint = feature.getGeometry().getCoordinates();
+                                    var linkFirstPoint = x.getGeometry().getFirstCoordinate();
+                                    var linkLastPoint = x.getGeometry().getLastCoordinate();
+                                    if (JSON.stringify(nodePoint) === JSON.stringify(linkFirstPoint)) {
+                                        x.set("SNodeID", id);
+                                        let linkID = Array.from(new Set([...feature.get('LinkID'), x.get("ID")]));
+                                        feature.set("LinkID", linkID)
+                                        feature.set("NumConLink", feature.get('LinkID').length);
+                                    }
+                                    if (JSON.stringify(nodePoint) === JSON.stringify(linkLastPoint)) {
+                                        x.set("ENodeID", id);
+                                        let linkID = Array.from(new Set([...feature.get('LinkID'), x.get("ID")]));
+                                        feature.set("LinkID", linkID)
+                                        feature.set("NumConLink", feature.get('LinkID').length);
+                                    }
+                                }
+                            });
+                        }
+                    })
+
+                    setCopyUndo(copyFeatures, updateFeatures);
+                    setUpUnDoReDoIndex();
+                });
+            }
+            ipcRenderer.on("addObject", (event, args) => {
+                addObjectItem(args);
+            });
+        }
+        return () => {
+            copySubscription?.unsubscribe();
+            ipcRenderer.removeAllListeners("addObject");
+        }
+    }, [item])
     return (
         <>
             <Warp>
@@ -220,8 +327,12 @@ export default function LayerItem({ item }) {
                                         </IconButton>
                                     </Tooltip>
                                     <Menu open={addMenuOpen} anchorEl={addAnchorEl} onClose={addMenuHandleClose}>
-                                        <MenuItem>LaneSide</MenuItem>
-                                        <MenuItem>Link</MenuItem>
+                                        <MenuItem onClick={() => addObjectItem('LAYER_LANESIDE')}>LaneSide</MenuItem>
+                                        <MenuItem onClick={() => addObjectItem('LAYER_LN_LINK')}>Link</MenuItem>
+                                        <MenuItem onClick={() => addObjectItem('LAYER_LN_NODE')}>Node</MenuItem>
+                                        <MenuItem onClick={() => addObjectItem('LAYER_POI')}>Poi</MenuItem>
+                                        <MenuItem onClick={() => addObjectItem('LAYER_ROADLIGHT')}>RoadLight</MenuItem>
+                                        <MenuItem onClick={() => addObjectItem('LAYER_ROADMARK')}>RoadMark</MenuItem>
                                     </Menu>
 
 

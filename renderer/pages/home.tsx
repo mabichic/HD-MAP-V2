@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ipcRenderer } from 'electron';
 import HdMap from '../component/HdMap';
 import { layerState } from '../state/Layer';
@@ -8,6 +8,8 @@ import VworldTileLayer from '../component/layer/VworldTileLayer';
 import Layers from '../component/Layers';
 import ConfirmDialog from '../component/ConfirmDialog';
 import Loading from '../component/Loading';
+import { loadingService } from '../component/service/message.service';
+import AlertDialog from '../component/AlertDialog';
 const Store = require('electron-store');
 
 const store = new Store();
@@ -29,11 +31,24 @@ function Home() {
   const test2 = async () => {
 
   }
+  useEffect(()=>{
+    ipcRenderer.on("ladingStart", (event, args) => {
+      loadingService.sendMessage(true);
+    });
+    ipcRenderer.on("ladingEnd", (event, args) => {
+      loadingService.sendMessage(false);
+    });
+    return () => {
+      ipcRenderer.removeAllListeners("ladingStart");
+      ipcRenderer.removeAllListeners("ladingEnd");
+    }
+  },[])
   return (
       <HdMap zoom={10} center={[234075, 419607]}>
         <Layers>
         </Layers>
         <ConfirmDialog/>
+        <AlertDialog/>
         <Loading/>
       </HdMap> 
   );

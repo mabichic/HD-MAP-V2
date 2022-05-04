@@ -6,6 +6,7 @@ import Converter from "../../../common/Converter";
 import { getExtensionOfFilename } from "../../../common/util";
 
 export default function LoadAll(mainWindow: BrowserWindow, store: any) {
+  mainWindow.webContents.send("ladingStart");
   let index = store.get("fileIndex");
   dialog
     .showOpenDialog({
@@ -35,6 +36,8 @@ export default function LoadAll(mainWindow: BrowserWindow, store: any) {
           mainWindow.webContents.send("load", dataSet);
           store.set("fileIndex", index+1);
         } 
+      }else{ 
+        mainWindow.webContents.send("ladingEnd")
       }
     });
 }

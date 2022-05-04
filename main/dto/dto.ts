@@ -244,13 +244,13 @@ export class LAYER_ROADLIGHT implements LAYER_ROADLIGHT_PROPERTIE {
 }
 
 export class LAYER_ROADMARK implements LAYER_ROADMARK_PROPERTIE {
+  ID: number;
   Type: number;
   SubType: number;
-  StopLineID: number[];
-  PointXY: number[][][];
   NumStopLine: number;
+  StopLineID: number[];
   NumPoint: number;
-  ID: number;
+  PointXY: number[][][];
   group: "LAYER_ROADMARK";
   Index:number;
   constructor(array) {

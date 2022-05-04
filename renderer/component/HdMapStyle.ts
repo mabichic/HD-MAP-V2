@@ -10,8 +10,8 @@ import CircleStyle from "ol/style/Circle";
 const HdMapStyle = function (feature, resolution) {
   var zoom = Math.log2(156543.03390625) - Math.log2(resolution);
   if (zoom < 19) {
-    if (feature.get("group") === "LAYER_POI" || feature.get("group") === "LAYER_LN_NODE"||feature.get("group") === "LAYER_ROADMARK"||feature.get("group") === "LAYER_ROADLIGHT") return null; 
-     let style = new Style({
+    if (feature.get("group") === "LAYER_POI" || feature.get("group") === "LAYER_LN_NODE" || feature.get("group") === "LAYER_ROADMARK" || feature.get("group") === "LAYER_ROADLIGHT") return null;
+    let style = new Style({
       fill: new Fill({
         color: "rgba(255, 255, 255, 0.2)",
       }),
@@ -28,7 +28,6 @@ const HdMapStyle = function (feature, resolution) {
     });
     style.setGeometry(feature.getGeometry().simplify(0.1));
     return style;
-
   }
 
   //19 - 20 전에는 노드 없어도 되지 않을까
@@ -222,4 +221,25 @@ export const selectedStyle = function (feature) {
   return styles;
 };
 
+export const MeasureStyle = () => {
+  return new Style({
+    fill: new Fill({
+      color: "rgba(255, 255, 255, 0.2)",
+    }),
+    stroke: new Stroke({
+      color: "rgba(0, 0, 0, 0.5)",
+      lineDash: [10, 10],
+      width: 2,
+    }),
+    image: new CircleStyle({
+      radius: 5,
+      stroke: new Stroke({
+        color: "rgba(0, 0, 0, 0.7)",
+      }),
+      fill: new Fill({
+        color: "rgba(255, 255, 255, 0.2)",
+      }),
+    }),
+  });
+};
 export default HdMapStyle;
