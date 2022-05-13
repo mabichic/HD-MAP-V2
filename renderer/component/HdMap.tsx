@@ -306,6 +306,7 @@ function HdMap({ children, zoom, center }) {
             if (select.getFeatures().getLength() > 0) {
                 DeleteFeature(select.getFeatures().getArray());
                 select.getFeatures().clear();
+                dellOverlay();
             } else {
                 alertService.sendMessage("Error.", "선택된 객체가 없습니다.");
             }

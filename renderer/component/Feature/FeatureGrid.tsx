@@ -4,7 +4,7 @@ import VectorSource from "ol/source/Vector";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import MapContext from "../context/MapContext";
 import { getUnDoReDoIndex, setUpUnDoReDoIndex, UndoPush } from "../modify/UndoRedo";
-import { featureService, loadingService } from "../service/message.service";
+import { alertService, featureService, loadingService } from "../service/message.service";
 import FeatureEditor from "./FeatureEditor";
 
 
@@ -43,8 +43,19 @@ export default function FeatureGrid({
         loadingService.sendMessage(true);
         return () => {
             loadingService.sendMessage(false);
+            if (subscription !== null) subscription.unsubscribe();
+
         };
     }, [])
+
+    useEffect(() => {
+        console.log(gridApi);
+        gridApi
+        return () => {
+            gridApi?.destroy();
+        };
+    }, [gridApi]);
+
     const zoomToFeatures = () => {
         let feautes = [];
         gridApi.getSelectedRows().forEach((row) => {
@@ -65,6 +76,7 @@ export default function FeatureGrid({
     }
 
     const onGridReady = (params) => {
+        console.log(params);
         setGridApi(params.api);
         setGridColumnApi(params.columnApi);
         loadingService.sendMessage(false);
@@ -81,26 +93,45 @@ export default function FeatureGrid({
     });
 
     const onCellEditingStarted = (params) => {
+        console.log(params);
         if (params.colDef.field === "StopLineID") {
             subscription = featureService.getMessage().subscribe(message => {
                 if (message.state === "stopIDSSelected") {
                     if (source.getFeatureByUid(message.features[0].ol_uid) !== null) {
-                        if (!params.value.includes(message.features[0].get("ID"))) {
-                            params.value.push(message.features[0].get("ID"));
+                        console.log(params);
+                        if (params.node.data.group === "LAYER_ROADMARK" && params.node.data.ID === message.features[0].get("ID")) {
+                            alertService.sendMessage("Error.", "자기 자신을 Stop Line ID로 등록 할 수 없습니다.");
+                            message.select.getFeatures().clear();
+                            subscription.unsubscribe();
                             params.api.stopEditing();
-                            params.api.refreshCells();
+                        } else if (!params.value.includes(message.features[0].get("ID"))) {
+                            // params.data.StopLineID.push(message.features[0].get("ID"));
+                            // params.api.refreshCells();
+                            //[...params.value,message.features[0].get("ID")]
+                            const instances = params.api.getCellEditorInstances();
+
+                            if (instances?.length > 0) {
+                                console.log(instances[0]);
+                                instances[0].eInput.value = [...params.api.getValue(params.colDef.field, params), message.features[0].get("ID")].sort((a, b) => { return a - b; }).join(",")
+
+                            }
                             subscription.unsubscribe();
                             message.select.getFeatures().clear();
                             message.select.getFeatures().push(source.getFeatureById(params.data.featureID));
+                            params.api.stopEditing();
+
                         } else {
-                            alert("이미 등록된 Stop Line ID 입니다");
+                            alertService.sendMessage("Error.", "이미 등록된 Stop Line ID 입니다");
                             message.select.getFeatures().clear();
                             message.select.getFeatures().push(source.getFeatureById(params.data.featureID));
+                            params.api.stopEditing();
+                            subscription.unsubscribe();
                         }
                     } else {
-                        alert("등록되지 않은 ID입니다. 해당 RoadMark를 다시 확인해주세요.");
+                        alertService.sendMessage("Error.", "등록되지 않은 ID입니다. 해당 RoadMark를 다시 확인해주세요.");
                         message.select.getFeatures().clear();
                         message.select.getFeatures().push(source.getFeatureById(params.data.featureID));
+                        params.api.stopEditing();
                     }
                 }
             });
@@ -109,13 +140,21 @@ export default function FeatureGrid({
     const onCellEditingStopped = (e) => {
         if (e.oldValue === e.newValue) return;
         const dataId = e.colDef.field === "ID" ? e.oldValue : e.node.data.ID;
-        const data = { field: e.colDef.field, data: e.newValue };
+        
         let feature = source.getFeatureById(e.data.featureID);
         let prevFeature = feature.clone();
-        // feature.set(e.colDef.field, e.newValue);
+        let data = { field: e.colDef.field, data: e.newValue };
+        
+        if (e.colDef.field === "StopLineID") {
+            data = { field: e.colDef.field, data: [e.newValue] };
+            feature.set("NumStopLine", e.data.StopLineID.length);
+        }
+        feature.set(data.field, data.data);
         let nextFeautre = feature.clone();
+        // feature.setProperties
         UndoPush("UPDATE", feature.get("source"), feature, prevFeature, nextFeautre, getUnDoReDoIndex());
         setUpUnDoReDoIndex();
+        console.log(e);
         // mapService.changeObject(dataKey, dataId, data);
     };
 

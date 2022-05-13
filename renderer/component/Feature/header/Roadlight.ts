@@ -1,4 +1,4 @@
-import { arrayValueSetter, extractValues, lookupValue, valueToArry } from "./FeatureHader";
+import { extractValues, lookupValue, valueToArry } from "./FeatureHader";
 
 const typeMappings = {
   0: "TYPE_NONE",
@@ -24,6 +24,7 @@ const subTypes = extractValues(subTypeMappings);
 const divs = extractValues(divMappings);
 
 const stopLineIDCount = (params) => {
+  console.log(params.data.StopLineID.length);
   return params.data.StopLineID.length;
 };
 export const LayerRoadlightHader = [

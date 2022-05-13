@@ -1,4 +1,4 @@
-import { extractValues, lookupValue } from "./FeatureHader";
+import { extractValues, lookupValue, valueToArry } from "./FeatureHader";
 
 const typeMappings = {
   0: "TYPE_NONE",
@@ -13,23 +13,25 @@ const typeMappings = {
   9: "RM_VIRTUAL_STOPLINE",
 };
 const subTypeMappings = {
-    0: "TYPE_NONE",
-    1: "RM_ARROW_S",
-    2: "RM_ARROW_L",
-    3: "RM_ARROW_R",
-    4: "RM_ARROW_SL",
-    5: "RM_ARROW_SR",
-    6: "RM_ARROW_U",
-    7: "RM_ARROW_US",
-    8: "RM_ARROW_UL",
-    9: "RM_ARROW_LR",
-    10: "RM_ARROW_FORBID_L",
-    11: "RM_ARROW_FORBID_R",
-    12: "RM_ARROW_FORBID_S",
-    13: "RM_ARROW_FORBID_U",
-    14: "RM_STOPLINE_UNSIGNED_INTERSECTION",
-  };
-
+  0: "TYPE_NONE",
+  1: "RM_ARROW_S",
+  2: "RM_ARROW_L",
+  3: "RM_ARROW_R",
+  4: "RM_ARROW_SL",
+  5: "RM_ARROW_SR",
+  6: "RM_ARROW_U",
+  7: "RM_ARROW_US",
+  8: "RM_ARROW_UL",
+  9: "RM_ARROW_LR",
+  10: "RM_ARROW_FORBID_L",
+  11: "RM_ARROW_FORBID_R",
+  12: "RM_ARROW_FORBID_S",
+  13: "RM_ARROW_FORBID_U",
+  14: "RM_STOPLINE_UNSIGNED_INTERSECTION",
+};
+const stopLineIDCount = (params) => {
+  return params.data.StopLineID.length;
+};
 const types = extractValues(typeMappings);
 const subTypes = extractValues(subTypeMappings);
 export const LayerRoadmarkHader = [
@@ -64,8 +66,16 @@ export const LayerRoadmarkHader = [
       return lookupValue(subTypeMappings, params.value);
     },
   },
-  { field: "NumStopLine", editable: false  },
-  { field: "StopLineID" },
+  { field: "NumStopLine", editable: false, valueGetter: stopLineIDCount },
+  {
+    field: "StopLineID",
+    // valueFormatter: function (params) {
+    //   console.log(params.value);
+    //   return valueToArry(params.value);
+    // },
+    valueSetter: valueToArry,
+
+  },
   { field: "NumPoint", editable: false },
   { field: "PointXY", editable: false },
 ];

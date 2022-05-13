@@ -85,12 +85,12 @@ export function HDMapMenu(mainWindow: BrowserWindow, store:any):Array<(MenuItemC
           {
             label: "Feature Copy",
             click: (e) => {FeatureCopy(mainWindow, store)},
-            accelerator : "c"
+            accelerator : "Shift+c"
           },
           {
             label: "Feature Paste",
             click: (e) => {FeaturePaste(mainWindow, store)},
-            accelerator : "v"
+            accelerator : "Shift+v"
           },
           {
             label: "Feature Delete",

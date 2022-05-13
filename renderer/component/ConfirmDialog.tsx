@@ -1,4 +1,3 @@
-import * as React from 'react';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -6,6 +5,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import Paper from '@mui/material/Paper';
+import * as React from 'react';
 import Draggable from 'react-draggable';
 import { confrimService } from './service/message.service';
 
@@ -28,7 +28,7 @@ import { confrimService } from './service/message.service';
 //     return confirmAction; 
 // };
 
-function PaperComponent(props) {
+export function PaperComponent(props) {
   return (
     <Draggable
       handle="#draggable-dialog-title"
