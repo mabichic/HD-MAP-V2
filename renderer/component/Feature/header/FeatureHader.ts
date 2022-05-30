@@ -25,6 +25,8 @@ export function extractValues(mappings: Record<number, string>) {
 }
 
 export function valueToArry(params) {
+  console.log(params);
+  if(params.newValue===params.oldValue) return params.oldValue;
   if (!pattern_eng.test(params.newValue) && !pattern_spc.test(params.newValue) && !pattern_kor.test(params.newValue)) {
     
     if (params.node.data.group === "LAYER_ROADMARK") {
@@ -77,7 +79,7 @@ export function linkIdCheck (params){
     alertService.sendMessage("Error.", "숫자만 입력 할 수 있습니다.");
     return params.oldValue;
   } else if (newValue === params.oldValue) {
-    alertService.sendMessage("Error.", "입력하신 값과 이전 값이 동일합니다.");
+    // alertService.sendMessage("Error.", "입력하신 값과 이전 값이 동일합니다.");
     return params.oldValue;
   } else {
     if (params.data.source.getFeatureById(params.data.group + params.data.Index + "_" + params.newValue) === null) {
