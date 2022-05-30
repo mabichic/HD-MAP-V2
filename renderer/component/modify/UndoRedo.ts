@@ -55,26 +55,26 @@ export const setUndo = () => {
 };
 export const setRedo = () => {
   let tempIndex = getUnDoReDoIndex() - 1;
-  console.log(tempIndex);
   let length = redoDatas.length;
   for (let i = 0; i < length; i++) {
     if (tempIndex !== redoDatas[redoDatas.length - 1].index) {
       setUpUnDoReDoIndex();
       featureService.selected("featureChange", null);
-      return;
-    }
-    let data = redoDatas.pop();
-    undoDatas.push(data);
-    tempIndex = data.index;
-    if (data.type === "DRAW") {
-      data.source.addFeature(data.feature);
-    } else if (data.type === "UPDATE") {
-      data.feature.setProperties(data.nextFeautre.getProperties(), false);
-    } else if (data.type === "MODIFY") {
-      data.feature.setProperties(data.nextFeautre.getProperties(), false);
-      data.feature.setGeometry(data.nextFeautre.getGeometry());
-    } else if (data.type === "DELETE") {
-      data.source.removeFeature(data.feature);
+      break;
+    } else {
+      let data = redoDatas.pop();
+      undoDatas.push(data);
+      tempIndex = data.index;
+      if (data.type === "DRAW") {
+        data.source.addFeature(data.feature);
+      } else if (data.type === "UPDATE") {
+        data.feature.setProperties(data.nextFeautre.getProperties(), false);
+      } else if (data.type === "MODIFY") {
+        data.feature.setProperties(data.nextFeautre.getProperties(), false);
+        data.feature.setGeometry(data.nextFeautre.getGeometry());
+      } else if (data.type === "DELETE") {
+        data.source.removeFeature(data.feature);
+      }
     }
   }
   featureService.selected("featureChange", null);

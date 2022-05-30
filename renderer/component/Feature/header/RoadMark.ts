@@ -73,7 +73,7 @@ export const LayerRoadmarkHader = [
     //   console.log(params.value);
     //   return valueToArry(params.value);
     // },
-    valueSetter: valueToArry,
+    valueParser: valueToArry,
 
   },
   { field: "NumPoint", editable: false },

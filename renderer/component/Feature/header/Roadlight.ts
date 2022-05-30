@@ -1,4 +1,4 @@
-import { extractValues, lookupValue, valueToArry } from "./FeatureHader";
+import { extractValues, idCheck, lookupValue, numberCheck, valueToArry } from "./FeatureHader";
 
 const typeMappings = {
   0: "TYPE_NONE",
@@ -24,12 +24,11 @@ const subTypes = extractValues(subTypeMappings);
 const divs = extractValues(divMappings);
 
 const stopLineIDCount = (params) => {
-  console.log(params.data.StopLineID.length);
   return params.data.StopLineID.length;
 };
 export const LayerRoadlightHader = [
-  { field: "ID" },
-  { field: "LaneID" },
+  { field: "ID", valueSetter: idCheck, },
+  { field: "LaneID", valueParser :  numberCheck },
   {
     field: "Type",
     cellEditor: "agSelectCellEditor",
@@ -82,7 +81,7 @@ export const LayerRoadlightHader = [
     //   console.log(params.value);
     //   return valueToArry(params.value);
     // },
-    valueSetter: valueToArry,
+    valueParser: valueToArry,
 
   },
   { field: "NumPoint", editable: false },

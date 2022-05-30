@@ -1,13 +1,13 @@
-import { ReactNode, SyntheticEvent, useContext, useEffect, useState } from "react";
-import { featureService } from "../service/message.service";
+import { Divider, FormControlLabel, Radio, RadioGroup, Tab, Tabs } from "@mui/material";
 import "ag-grid-community/dist/styles/ag-grid.css";
 import "ag-grid-community/dist/styles/ag-theme-alpine.css";
-import MapContext from "../context/MapContext";
-import { Divider, FormControlLabel, Radio, RadioGroup, Tab, Tabs } from "@mui/material";
-import FeatureGrid from "./FeatureGrid";
 import { Feature } from "ol";
 import { Select } from "ol/interaction";
 import VectorSource from "ol/source/Vector";
+import { ReactNode, SyntheticEvent, useContext, useEffect, useState } from "react";
+import MapContext from "../context/MapContext";
+import { featureService } from "../service/message.service";
+import FeatureGrid from "./FeatureGrid";
 import { LayerLanesideHader } from "./header/Laneside";
 import { LayerLnLinkHader } from "./header/Link";
 import { LayerLnNodeHader } from "./header/Node";
@@ -22,9 +22,10 @@ interface TabPanelProps {
     feature: Array<any>;
     source: VectorSource;
     header: Array<any>;
+    type:string;
 }
 function TabPanel(props: TabPanelProps) {
-    const { children, value, index, feature, source, header, ...other } = props;
+    const { children, value, index, feature, source, header,type, ...other } = props;
     return (
         <div
             role="tabpanel"
@@ -38,6 +39,7 @@ function TabPanel(props: TabPanelProps) {
                 feature={feature}
                 source={source}
                 columnDefs={header}
+                type={type}
             />
         </div>
     );
@@ -228,12 +230,12 @@ export default function FeatureItem({ index, source }) {
                 <Divider />
             </div>
             <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                <TabPanel value={value} index={1} feature={layerLaneside} source={source} header={LayerLanesideHader} />
-                <TabPanel value={value} index={2} feature={layerLnLink} source={source} header={LayerLnLinkHader} />
-                <TabPanel value={value} index={3} feature={layerLnNode} source={source} header={LayerLnNodeHader} />
-                <TabPanel value={value} index={4} feature={layerPoi} source={source} header={LayerPOIHader} />
-                <TabPanel value={value} index={5} feature={layerRoadlight} source={source} header={LayerRoadlightHader} />
-                <TabPanel value={value} index={6} feature={layerRoadmark} source={source} header={LayerRoadmarkHader} />
+                <TabPanel value={value} index={1} type={"layerLaneside"} feature={layerLaneside} source={source} header={LayerLanesideHader} />
+                <TabPanel value={value} index={2} type={"layerLnLink"} feature={layerLnLink} source={source} header={LayerLnLinkHader} />
+                <TabPanel value={value} index={3} type={"layerLnNode"} feature={layerLnNode} source={source} header={LayerLnNodeHader} />
+                <TabPanel value={value} index={4} type={"layerPoi"} feature={layerPoi} source={source} header={LayerPOIHader} />
+                <TabPanel value={value} index={5} type={"layerRoadlight"} feature={layerRoadlight} source={source} header={LayerRoadlightHader} />
+                <TabPanel value={value} index={6} type={"layerRoadmark"} feature={layerRoadmark} source={source} header={LayerRoadmarkHader} />
                 <Tabs value={value} sx={{ backgroundColor: 'white' }} onChange={handleChange}>
                     <Tab label="Laneside" value={1} />
                     <Tab label="Link" value={2} />

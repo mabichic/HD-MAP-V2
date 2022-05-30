@@ -11,6 +11,7 @@ const featureDelSubject = new Subject();
 export const featureService = {
   selected: (state, features) => feautreSubject.next({ state: state, features: features }),
   stopLineIdSelected: (state, features, select) => feautreSubject.next({ state: state, features: features, select: select }),
+  linkIdSelected: (state, features, select) => feautreSubject.next({ state: state, features: features, select: select }),
   dataVisible: (state, layer) => feautreSubject.next({ state: state, layer: layer }),
   sendMessage: (state, message) => feautreSubject.next({ state: state, text: message }),
   clearMessage: () => feautreSubject.next(),

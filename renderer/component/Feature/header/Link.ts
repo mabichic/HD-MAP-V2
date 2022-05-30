@@ -1,4 +1,4 @@
-import { extractValues, lookupValue } from "./FeatureHader";
+import { extractValues, idCheck, linkIdCheck, lookupValue, numberCheck } from "./FeatureHader";
 
 const typeMappings = {
   0: "TYPE_NONE",
@@ -30,17 +30,17 @@ const linkSubTypes = extractValues(subTypeMappings);
 const linkTwowayTypes = extractValues(twowayMappings);
 
 export const LayerLnLinkHader = [
-  { field: "ID" },
-  { field: "MID" },
-  { field: "LID" },
-  { field: "RID" },
-  { field: "InMID" },
-  { field: "InLID" },
-  { field: "InRID" },
-  { field: "outMID" },
-  { field: "outLID" },
-  { field: "outRID" },
-  { field: "Junction" },
+  { field: "ID", valueSetter: idCheck,},
+  { field: "MID", valueParser :  numberCheck },
+  { field: "LID", valueParser :  numberCheck },
+  { field: "RID", valueParser :  numberCheck },
+  { field: "InMID", valueParser :  numberCheck },
+  { field: "InLID", valueParser :  numberCheck },
+  { field: "InRID", valueParser :  numberCheck },
+  { field: "outMID", valueParser :  numberCheck },
+  { field: "outLID", valueParser :  numberCheck },
+  { field: "outRID", valueParser :  numberCheck },
+  { field: "Junction", valueParser :  numberCheck },
   {
     field: "Type",
     cellEditor: "agSelectCellEditor",
@@ -86,12 +86,12 @@ export const LayerLnLinkHader = [
       return lookupValue(twowayMappings, params.value);
     },
   },
-  { field: "RLID" },
-  { field: "LLinkID" },
-  { field: "RLinkID" },
+  { field: "RLID", valueParser :  numberCheck },
+  { field: "LLinkID", valueParser :  linkIdCheck },
+  { field: "RLinkID", valueParser :  linkIdCheck },
   { field: "SNodeID" ,editable: false,},
   { field: "ENodeID" ,editable: false,},
-  { field: "Speed" },
+  { field: "Speed", valueParser :  numberCheck },
   { field: "NumPoint" ,editable: false,},
   { field: "PointXY" ,editable: false,},
 ];

@@ -179,13 +179,20 @@ function HdMap({ children, zoom, center }) {
             let features = e.selected as any[];
 
             let stopIDS = [];
+            let linkIDS = [];
             features.forEach((feature) => {
                 if (feature.get("group") === "LAYER_ROADMARK" && feature.get("Type") === 7) {
                     stopIDS.push(feature);
                 }
+                if (feature.get("group") === "LAYER_LN_LINK") {
+                    linkIDS.push(feature);
+                }
             });
             if (stopIDS.length > 0) {
                 featureService.stopLineIdSelected("stopIDSSelected", stopIDS, select);
+            }
+            if (linkIDS.length > 0) {
+                featureService.linkIdSelected("linkIDSSelected", linkIDS, select);
             }
             if (select.getFeatures().getLength() > 0) featureService.selected("selected", features);
         });

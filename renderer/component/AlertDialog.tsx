@@ -36,7 +36,7 @@ export default function AlertDialog() {
                 {onConfirm?.state}
             </DialogTitle>
             <DialogContent>
-                <DialogContentText>
+                <DialogContentText style={{whiteSpace: 'pre-wrap'}}>
                     {onConfirm?.text}
                 </DialogContentText>
             </DialogContent>

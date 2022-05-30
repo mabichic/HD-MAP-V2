@@ -1,21 +1,81 @@
 import { Box, Button, Divider, IconButton, ListItem, ListItemIcon, ListItemText, MenuItem, Modal, Select, SvgIcon, TextField, Typography } from "@mui/material";
 
-import SettingsIcon from '@mui/icons-material/Settings';
 import CloseIcon from '@mui/icons-material/Close';
+import SettingsIcon from '@mui/icons-material/Settings';
+import { useCallback, useState } from "react";
+import { getUnDoReDoIndex, setUpUnDoReDoIndex, UndoPush } from "../modify/UndoRedo";
+import { featureService } from "../service/message.service";
+import { colourMappings, lanesideTypeMappings } from "./header/Laneside";
 const style = {
     position: 'absolute' as 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
     width: 334,
-    height:320,
+    height: 320,
     bgcolor: 'white',
     border: '0px',
     boxShadow: 24,
     p: 0,
 };
-function FeatureEditor({ handleClose, open }) {
 
+function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
+    const [value, setValue] = useState("");
+    const [field, setField] = useState(fields[0].colId)
+    console.log(type);
+    const ValueField = () => {  
+        let menu;
+        if (field === "Type" || field === "Color") {
+            if (type==='layerLaneside'&& field === "Type") menu = lanesideTypeMappings;
+            else if (field === "Color") menu = colourMappings;
+            
+            const menuRendering = () => {
+                const result = [];
+                for (let key in menu) {
+                    result.push(<MenuItem key={`menuItem${key}`} value={Number(key)}>{menu[Number(key)]}</MenuItem>);
+                }
+                return result;
+            }
+            return (
+                <Select
+                    size="small"
+                    sx={{ width: '133px', marginLeft: '20px' }}
+                    value={1}
+                    // onChange={fieldChange}
+                    displayEmpty
+                    inputProps={{ 'aria-label': 'Without label' }}
+                >
+                    {menuRendering()}
+                </Select>
+            )
+        } else {
+            return (
+                <TextField id="standard-basic" variant="outlined" sx={{ marginLeft: '20px', width: '294px', marginBottom: '17px' }} size="small" value={value} onChange={(e) => setValue(e.target.value)} />
+            )
+        }
+    }
+    const valueChange = useCallback((e) => {
+        console.log(gridRef.current.api);
+        console.log(gridRef.current.api.getSelectedNodes());
+        console.log(value);
+
+        gridRef.current.api.getSelectedNodes().forEach((node) => {
+            // console.log(node.data.featureID);
+            let feature = source.getFeatureById(node.data.featureID);
+            let prevFeature = feature.clone();
+            let data = { field: field, data: value };
+            feature.set(data.field, data.data);
+            let nextFeautre = feature.clone();
+            // feature.setProperties
+            UndoPush("UPDATE", feature.get("source"), feature, prevFeature, nextFeautre, getUnDoReDoIndex());
+        });
+        setUpUnDoReDoIndex();
+        featureService.selected("featureChange", null);
+
+    }, [value, gridRef, source]);
+    const fieldChange = useCallback((e) => {
+        setField(e.target.value);
+    }, [value, field, gridRef, source])
     return (
         <Modal
             open={open}
@@ -52,29 +112,33 @@ function FeatureEditor({ handleClose, open }) {
                 <Select
                     size="small"
                     sx={{ width: '133px', marginLeft: '20px' }}
-                    value={10}
-                    // onChange={handleChange}
+                    value={field}
+                    onChange={fieldChange}
                     displayEmpty
                     inputProps={{ 'aria-label': 'Without label' }}
                 >
-                    <MenuItem value="">
-                        <em>None</em>
-                    </MenuItem>
-                    <MenuItem value={10}>Mid</MenuItem>
-                    <MenuItem value={20}>Twenty</MenuItem>
-                    <MenuItem value={30}>Thirty</MenuItem>
+                    {fields.map((field) =>
+                        <MenuItem key={field.colId} value={field.colId}>{field.colId}</MenuItem>
+                    )}
                 </Select>
                 <Typography id="modal-modal-title" variant="subtitle1" sx={{ marginLeft: '20px', marginTop: '11px' }}>
                     Value
                 </Typography>
-                <TextField id="standard-basic" variant="outlined" sx={{ marginLeft: '20px', width: '294px', marginBottom: '17px' }} size="small" />
-                <Divider />
-                <div style={{textAlign:'right', padding:0}}>
+                {(field === "Type" || field === "Color") ?
+                    <ValueField />
+                    :
+                    <TextField id="standard-basic" variant="outlined" sx={{ marginLeft: '20px', width: '294px', marginBottom: '17px' }} size="small" value={value} onChange={(e) => setValue(e.target.value)} />
+                }
 
-                    <Button variant="outlined" href="#outlined-buttons" sx={{ marginLeft: '20px', marginTop: '10px', marginBottom: '10px', marginRight:'8px' , width:'80px'}}>
+                {/* <ValueField /> */}
+                {/* <TextField id="standard-basic" variant="outlined" sx={{ marginLeft: '20px', width: '294px', marginBottom: '17px' }} size="small" value={value} onChange={(e) => setValue(e.target.value)} /> */}
+                <Divider />
+                <div style={{ textAlign: 'right', padding: 0 }}>
+
+                    <Button variant="outlined" href="#outlined-buttons" onClick={valueChange} sx={{ marginLeft: '20px', marginTop: '10px', marginBottom: '10px', marginRight: '8px', width: '80px' }}>
                         확인
                     </Button>
-                    <Button variant="outlined" href="#outlined-buttons" sx={{marginRight:'20px', width:'80px'}} color="error" onClick={handleClose}>
+                    <Button variant="outlined" href="#outlined-buttons" sx={{ marginRight: '20px', width: '80px' }} color="error" onClick={handleClose}>
                         취소
                     </Button>
                 </div>

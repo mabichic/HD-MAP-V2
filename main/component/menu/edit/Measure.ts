@@ -8,7 +8,6 @@ export default function Measure(mainWindow: BrowserWindow, store: any, checked: 
   }
 }
 
-
 export function MeasureClear(mainWindow: BrowserWindow, store: any) {
     mainWindow.webContents.send("measureClear");
 }

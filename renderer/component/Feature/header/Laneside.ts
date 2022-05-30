@@ -1,11 +1,11 @@
-import { extractValues, lookupKey, lookupValue } from "./FeatureHader";
+import { extractValues, idCheck, lookupKey, lookupValue, numberCheck } from "./FeatureHader";
 
-const colourMappings = {
+export const colourMappings = {
     0: 'LS_WHITE',
     1: 'LS_YELLOW',
     2: 'LS_BLUE',
 };
-const lanesideTypeMappings = {
+export const lanesideTypeMappings = {
     1: "LS_SOLID",
     2: "LS_DOT",
     3: "LS_DOUBLE",
@@ -17,9 +17,9 @@ const lanesideColours = extractValues(colourMappings);
 const lanesideTypes = extractValues(lanesideTypeMappings);
 
 export const LayerLanesideHader = [
-    { field: "ID" },
-    { field: "MID" },
-    { field: "LaneID" },
+    { field: "ID", valueParser :  idCheck},
+    { field: "MID", valueParser :  numberCheck },
+    { field: "LaneID", valueParser :  numberCheck },
     {
         field: 'Type',
         cellEditor: 'agSelectCellEditor',
