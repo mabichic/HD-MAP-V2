@@ -1,13 +1,5 @@
 import { readFileSync } from "fs";
-import {
-  GEOJSONTYPE,
-  LAYER_LANESIDE,
-  LAYER_LN_LINK,
-  LAYER_LN_NODE,
-  LAYER_POI,
-  LAYER_ROADLIGHT,
-  LAYER_ROADMARK,
-} from "../dto/dto";
+import { GEOJSONTYPE, LAYER_LANESIDE, LAYER_LN_LINK, LAYER_LN_NODE, LAYER_POI, LAYER_ROADLIGHT, LAYER_ROADMARK, LAYER_SAFEPOINT } from "../dto/dto";
 
 const objectSet = {
   LAYER_ROADMARK: LAYER_ROADMARK,
@@ -16,9 +8,10 @@ const objectSet = {
   LAYER_POI: LAYER_POI,
   LAYER_LN_LINK: LAYER_LN_LINK,
   LAYER_LN_NODE: LAYER_LN_NODE,
+  LAYER_SAFEPOINT: LAYER_SAFEPOINT,
 };
 
-export default function Converter(layerNM: "LAYER_LANESIDE" | "LAYER_LN_LINK" | "LAYER_LN_NODE" | "LAYER_POI" | "LAYER_ROADLIGHT" | "LAYER_ROADMARK",index:number,  dataSet: Array<any>, filePath: string) {
+export default function Converter(layerNM, index: number, dataSet: Array<any>, filePath: string) {
   let geoType: "Point" | "LineString" | "Polygon" | "MultiPoint" | "MultiLineString" | "MultiPolygon" = "Point";
   switch (layerNM) {
     case "LAYER_LANESIDE":
@@ -28,13 +21,14 @@ export default function Converter(layerNM: "LAYER_LANESIDE" | "LAYER_LN_LINK" | 
       break;
     case "LAYER_LN_NODE":
     case "LAYER_POI":
+    case "LAYER_SAFEPOINT":
       geoType = "Point";
       break;
     case "LAYER_ROADMARK":
       geoType = "Polygon";
       break;
   }
-
+  
   readFileSync(filePath, "utf-8")
     .split("\r\n")
     .forEach((array) => {
@@ -45,7 +39,7 @@ export default function Converter(layerNM: "LAYER_LANESIDE" | "LAYER_LN_LINK" | 
       let geson: GEOJSONTYPE = {
         type: "Feature",
         group: layerNM,
-        id: layerNM +index+ "_" + obj.ID,
+        id: layerNM + index + "_" + obj.ID,
         geometry: {
           type: geoType,
           coordinates: obj.PointXY,

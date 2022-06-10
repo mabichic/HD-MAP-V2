@@ -1,4 +1,3 @@
-import { readFileSync } from "fs";
 
 /**
  * 파일명에서 확장자명 추출

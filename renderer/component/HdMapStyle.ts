@@ -1,11 +1,10 @@
-import Style from "ol/style/Style";
-import Text from "ol/style/Text";
+import { LineString, MultiPoint } from "ol/geom";
+import Point from "ol/geom/Point";
+import { default as Circle, default as CircleStyle } from "ol/style/Circle";
 import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
-import Circle from "ol/style/Circle";
-import Point from "ol/geom/Point";
-import { LineString, MultiPoint } from "ol/geom";
-import CircleStyle from "ol/style/Circle";
+import Style from "ol/style/Style";
+import Text from "ol/style/Text";
 
 const HdMapStyle = function (feature, resolution) {
   var zoom = Math.log2(156543.03390625) - Math.log2(resolution);
@@ -161,6 +160,35 @@ const HdMapStyle = function (feature, resolution) {
       })
     );
     return styles;
+  }
+
+  if (feature.get("group") === "LAYER_SAFEPOINT") {
+    if (zoom < 19) return null;
+
+    // return new Style({
+    //     image: new Circle({
+    //         radius: 5,
+    //         fill: new Fill({
+    //         color: '#FFFF00',
+    //         }),
+    //     }),
+    // });
+
+    return new Style({
+      fill: new Fill({
+        color: "rgba(255, 255, 255, 1)",
+      }),
+      stroke: new Stroke({
+        color: "#ffcc33",
+        width: 2,
+      }),
+      image: new CircleStyle({
+        radius: 7,
+        fill: new Fill({
+          color: "#f2f2f2",
+        }),
+      }),
+    });
   }
 
   if (feature.get("group") === "GPS_LOG") {

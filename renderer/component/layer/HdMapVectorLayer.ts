@@ -1,10 +1,8 @@
-import { Draw, Snap } from "ol/interaction";
-import VectorLayer from "ol/layer/Vector";
-import VectorImageLayer from "ol/layer/VectorImage";
+import { Snap } from "ol/interaction";
 import { Vector } from "ol/layer";
 import LayerDraw from "./draw/LayerDraw";
 
-const HdMapVectorLayer = ({ source, style, title, zIndex = 0, map, layerIndex }) => {
+const HdMapVectorLayer = ({ source, style, title, zIndex = 0, map, layerIndex, filePaths }) => {
   let snap = new Snap({
     source: source,
   });
@@ -17,7 +15,8 @@ const HdMapVectorLayer = ({ source, style, title, zIndex = 0, map, layerIndex })
       selectable: false,
       dataVisible: false,
       snap: snap,
-      layerIndex : layerIndex
+      layerIndex : layerIndex,
+      filePaths : filePaths,
     },
     zIndex: map.getLayers().getLength()-1,
   });

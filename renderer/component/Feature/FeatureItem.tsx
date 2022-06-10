@@ -14,6 +14,7 @@ import { LayerLnNodeHader } from "./header/Node";
 import { LayerPOIHader } from "./header/POI";
 import { LayerRoadlightHader } from "./header/Roadlight";
 import { LayerRoadmarkHader } from "./header/RoadMark";
+import { LayerSafepoint } from "./header/Safepoint";
 
 interface TabPanelProps {
     children?: ReactNode;
@@ -22,10 +23,10 @@ interface TabPanelProps {
     feature: Array<any>;
     source: VectorSource;
     header: Array<any>;
-    type:string;
+    type: string;
 }
 function TabPanel(props: TabPanelProps) {
-    const { children, value, index, feature, source, header,type, ...other } = props;
+    const { children, value, index, feature, source, header, type, ...other } = props;
     return (
         <div
             role="tabpanel"
@@ -57,6 +58,7 @@ export default function FeatureItem({ index, source }) {
     const [layerPoi, setlayerPoi] = useState([]);
     const [layerRoadlight, setlayerRoadlight] = useState([]);
     const [layerRoadmark, setlayerRoadmark] = useState([]);
+    const [layerSafepoint, setlayerSafepoint] = useState([]);
     const [filter, setFilter] = useState([]);
     const [viewer, setViewer] = useState('all');
 
@@ -69,7 +71,7 @@ export default function FeatureItem({ index, source }) {
         let layer_poi = [];
         let layer_roadlight = [];
         let layer_roadmark = [];
-
+        let layer_safepoint = [];
         const pushData = (feature: any, group: string, dataSet: Array<any>) => {
             if (feature.get("group") === group) {
                 let data = feature.getProperties();
@@ -84,6 +86,7 @@ export default function FeatureItem({ index, source }) {
             pushData(feature, 'LAYER_POI', layer_poi);
             pushData(feature, 'LAYER_ROADLIGHT', layer_roadlight);
             pushData(feature, 'LAYER_ROADMARK', layer_roadmark);
+            pushData(feature, 'LAYER_SAFEPOINT', layer_safepoint);
         });
         setLayerLaneside(layer_laneside);
         setlayerLnLink(layer_ln_link);
@@ -91,6 +94,7 @@ export default function FeatureItem({ index, source }) {
         setlayerPoi(layer_poi);
         setlayerRoadlight(layer_roadlight);
         setlayerRoadmark(layer_roadmark);
+        setlayerSafepoint(layer_safepoint);
     }
     const update = (features: Array<Feature>) => {
         let selectedFeatureIDS = [];
@@ -103,6 +107,7 @@ export default function FeatureItem({ index, source }) {
         let layer_poi = [];
         let layer_roadlight = [];
         let layer_roadmark = [];
+        let layer_safepoint = [];
         const pushData = (feature: any, group: string, dataSet: Array<any>) => {
             if (selectedFeatureIDS.includes(feature.getId()) && feature.get("group") === group) {
                 let data = feature.getProperties();
@@ -117,6 +122,7 @@ export default function FeatureItem({ index, source }) {
             pushData(feature, 'LAYER_POI', layer_poi);
             pushData(feature, 'LAYER_ROADLIGHT', layer_roadlight);
             pushData(feature, 'LAYER_ROADMARK', layer_roadmark);
+            pushData(feature, 'LAYER_SAFEPOINT', layer_safepoint);
         });
         setLayerLaneside(layer_laneside);
         setlayerLnLink(layer_ln_link);
@@ -124,6 +130,7 @@ export default function FeatureItem({ index, source }) {
         setlayerPoi(layer_poi);
         setlayerRoadlight(layer_roadlight);
         setlayerRoadmark(layer_roadmark);
+        setlayerSafepoint(layer_safepoint);
     }
     useEffect(() => {
         if (viewer === "all") init();
@@ -236,6 +243,7 @@ export default function FeatureItem({ index, source }) {
                 <TabPanel value={value} index={4} type={"layerPoi"} feature={layerPoi} source={source} header={LayerPOIHader} />
                 <TabPanel value={value} index={5} type={"layerRoadlight"} feature={layerRoadlight} source={source} header={LayerRoadlightHader} />
                 <TabPanel value={value} index={6} type={"layerRoadmark"} feature={layerRoadmark} source={source} header={LayerRoadmarkHader} />
+                <TabPanel value={value} index={7} type={"layerSafepoint"} feature={layerSafepoint} source={source} header={LayerSafepoint} />
                 <Tabs value={value} sx={{ backgroundColor: 'white' }} onChange={handleChange}>
                     <Tab label="Laneside" value={1} />
                     <Tab label="Link" value={2} />
@@ -243,6 +251,7 @@ export default function FeatureItem({ index, source }) {
                     <Tab label="Poi" value={4} />
                     <Tab label="Roadlight" value={5} />
                     <Tab label="Roadmark" value={6} />
+                    <Tab label="Safepoint" value={7} />
                 </Tabs>
                 {/* <TabContext value={value}>
                     <TabPanel sx={{ flexGrow: 1, padding: '0px' }} value="1">

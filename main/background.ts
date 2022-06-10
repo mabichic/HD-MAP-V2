@@ -1,8 +1,8 @@
 import { app, ipcMain, Menu } from "electron";
 import serve from "electron-serve";
-import { createWindow } from "./helpers";
-import { GEOJSONTYPE } from "./dto/dto";
 import { HDMapMenu } from "./component/MenuTemplate";
+import SaveFile, { SaveAllFile } from "./component/SaveFile";
+import { createWindow } from "./helpers";
 
 const Store = require("electron-store");
 Store.initRenderer();
@@ -27,7 +27,8 @@ if (isProd) {
 
   const menu = Menu.buildFromTemplate(HDMapMenu(mainWindow,store));
   Menu.setApplicationMenu(menu);
-
+  ipcMain.on("fileSave", (event, res)=> SaveFile(mainWindow,event, res, store));
+  ipcMain.on("allFileSave", (event, res)=> SaveAllFile(mainWindow,event, res, store));
   if (isProd) {
     await mainWindow.loadURL("app://./home.html");
   } else {

@@ -93,3 +93,20 @@ export function linkIdCheck (params){
     }
   }
 }
+export function linkIdCheckNoSelf (params){ 
+  var newValue = Number(params.newValue);
+  if (isNaN(newValue)) {
+    alertService.sendMessage("Error.", "숫자만 입력 할 수 있습니다.");
+    return params.oldValue;
+  } else if (newValue === params.oldValue) {
+    // alertService.sendMessage("Error.", "입력하신 값과 이전 값이 동일합니다.");
+    return params.oldValue;
+  } else {
+    if (params.data.source.getFeatureById(params.data.group + params.data.Index + "_" + params.newValue) === null) {
+      alertService.sendMessage("Error.", "해당하는 Link ID를 가진 오브젝트가 없습니다.");
+      return params.oldValue;
+    }else {
+      return newValue;
+    }
+  }
+}

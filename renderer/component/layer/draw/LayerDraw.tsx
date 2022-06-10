@@ -2,12 +2,12 @@ import { Map } from "ol";
 import { Draw } from "ol/interaction";
 import VectorSource from "ol/source/Vector";
 import { getUnDoReDoIndex, setInitRedo, setUpUnDoReDoIndex, UndoPush } from "../../modify/UndoRedo";
-import { featureService, selectService } from "../../service/message.service";
+import { selectService } from "../../service/message.service";
 
-let point, lineString, polygon = null;
-let drawEnd = null;
-let drawStart = null;
 export default function LayerDraw(map: Map, source: VectorSource, style) {
+    let point, lineString, polygon = null;
+    let drawEnd = null;
+    let drawStart = null;
     point = new Draw({
         source: source,
         type: 'Point',
@@ -29,44 +29,47 @@ export default function LayerDraw(map: Map, source: VectorSource, style) {
     point.setActive(false);
     lineString.setActive(false);
     polygon.setActive(false);
-    source.set("layerDrawSwitch", layerDrawSwitch);
+    source.set("layerDrawSwitch", (type, maxID, layerIndex, source) => {
+        point.setActive(false);
+        lineString.setActive(false);
+        polygon.setActive(false);
+        if (drawEnd !== null) {
+            lineString.un('drawend', drawEnd);
+            point.un('drawend', drawEnd);
+            polygon.un('drawend', drawEnd);
+        }
+        if (drawStart !== null) {
+            lineString.un('drawstart', layerDrawStart)
+            point.un('drawstart', layerDrawStart)
+            polygon.un('drawstart', layerDrawStart)
+        }
+        if (type === "LAYER_LANESIDE" || type === "LAYER_LN_LINK" || type === "LAYER_ROADLIGHT") {
+            drawEnd = (e) => { layerDrawEnd(e, lineString, type, maxID, layerIndex, source); }
+            drawStart = (e) => { layerDrawStart(e); }
+            lineString.setActive(true);
+            lineString.on('drawstart', drawStart);
+            lineString.on('drawend', drawEnd);
+        } else if (type === "LAYER_LN_NODE" || type === "LAYER_POI" || type === "LAYER_SAFEPOINT") {
+            drawEnd = (e) => { layerDrawEnd(e, point, type, maxID, layerIndex, source); }
+            drawStart = (e) => { layerDrawStart(e); }
+            point.setActive(true);
+            point.on('drawstart', drawStart);
+            point.on('drawend', drawEnd);
+        } else if (type === "LAYER_ROADMARK") {
+            drawEnd = (e) => { layerDrawEnd(e, polygon, type, maxID, layerIndex, source); }
+            drawStart = (e) => { layerDrawStart(e); }
+            polygon.setActive(true);
+            polygon.on('drawstart', drawStart);
+            polygon.on('drawend', drawEnd);
+        }
+
+    });
 }
 
-const layerDrawSwitch = (type, maxID, layerIndex, source) => {
-    point.setActive(false);
-    lineString.setActive(false);
-    polygon.setActive(false);
-    if (drawEnd !== null) {
-        lineString.un('drawend', drawEnd);
-        point.un('drawend', drawEnd);
-        polygon.un('drawend', drawEnd);
-    }
-    if (drawStart !== null) {
-        lineString.un('drawstart', layerDrawStart)
-        point.un('drawstart', layerDrawStart)
-        polygon.un('drawstart', layerDrawStart)
-    }
-    if (type === "LAYER_LANESIDE" || type === "LAYER_LN_LINK" || type === "LAYER_ROADLIGHT") {
-        drawEnd = (e) => { layerDrawEnd(e, lineString, type, maxID, layerIndex, source); }
-        drawStart = (e) => { layerDrawStart(e); }
-        lineString.setActive(true);
-        lineString.on('drawstart', drawStart);
-        lineString.on('drawend', drawEnd);
-    } else if (type === "LAYER_LN_NODE" || type === "LAYER_POI") {
-        drawEnd = (e) => { layerDrawEnd(e, point, type, maxID, layerIndex, source); }
-        drawStart = (e) => { layerDrawStart(e); }
-        point.setActive(true);
-        point.on('drawstart', drawStart);
-        point.on('drawend', drawEnd);
-    } else if (type === "LAYER_ROADMARK") {
-        drawEnd = (e) => { layerDrawEnd(e, polygon, type, maxID, layerIndex, source); }
-        drawStart = (e) => { layerDrawStart(e); }
-        polygon.setActive(true);
-        polygon.on('drawstart', drawStart);
-        polygon.on('drawend', drawEnd);
-    }
+// const layerDrawSwitch = (type, maxID, layerIndex, source) => {
 
-}
+
+// }
 export const layerDrawOn = (evt) => {
 
 }
@@ -75,6 +78,8 @@ const layerDrawStart = (evt) => {
 }
 
 const layerDrawEnd = (evt, draw: Draw, type: String, maxID: number, layerIndex: number, source: VectorSource) => {
+
+    console.log(source);
     draw.setActive(false);
     selectService.selectActive(true);
     if (!isFinite(maxID)) maxID = 1;
@@ -175,6 +180,10 @@ const layerDrawEnd = (evt, draw: Draw, type: String, maxID: number, layerIndex: 
         evt.feature.set('SubType', 0);
         evt.feature.set('NumStopLine', 0);
         evt.feature.set('StopLineID', []);
+    }else if (type === "LAYER_SAFEPOINT") {
+        evt.feature.set('QueryLinkID', 0);
+        evt.feature.set('InterLinkID', 0);
+        evt.feature.set('length', 30);
     }
 
     if (drawType === "LineString") {
@@ -184,8 +193,8 @@ const layerDrawEnd = (evt, draw: Draw, type: String, maxID: number, layerIndex: 
     }
     evt.feature.set("group", type);
     evt.feature.set('Index', layerIndex);
-    UndoPush("DRAW", source,  evt.feature, null,null, getUnDoReDoIndex());
+    UndoPush("DRAW", source, evt.feature, null, null, getUnDoReDoIndex());
     setInitRedo();
     setUpUnDoReDoIndex();
-    
+
 }

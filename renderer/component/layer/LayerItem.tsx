@@ -7,7 +7,7 @@ import { Box, FormGroup, FormLabel, IconButton, ListItem, ListItemIcon, ListItem
 import { styled } from "@mui/system";
 import { MouseEvent, useContext, useEffect, useState } from "react";
 import OpacityIcon from '../../public/images/opacity _icon.svg';
-import { confrimService, featureCopyService, featureService, layerService } from "../service/message.service";
+import { alertService, confrimService, featureCopyService, featureService, layerService } from "../service/message.service";
 
 
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
@@ -24,7 +24,7 @@ import { selectService } from "../service/message.service";
 const Warp = styled(Box)({
     display: "inline-block", width: '100%', textAlign: 'left', padding: '10px', marginBottom: '17px', paddingRight: '20px', paddingLeft: '20px'
 });
-
+const LayerNames = ['LAYER_LANESIDE', 'LAYER_LN_LINK', 'LAYER_LN_NODE', 'LAYER_POI', 'LAYER_ROADLIGHT', 'LAYER_ROADMARK', 'LAYER_SAFEPOINT'];
 const CustomSlider = styled(Slider)({
     color: '#30459A',
     '& .MuiSlider-thumb': {
@@ -41,8 +41,13 @@ const CustomSwitch = styled(Switch)({
         backgroundColor: '#CAD2FC',
     },
 });
-export default function LayerItem({ item }) {
 
+
+function fnSort(a: any, b: any) {
+    return a['ID'] - b['ID']
+}
+export default function LayerItem({ item }) {
+    console.log(item);
     const map = useContext(MapContext);
     const [showTable, setShowTable] = useState(false);
     const [visible, setVisible] = useState(item.getVisible());
@@ -131,6 +136,11 @@ export default function LayerItem({ item }) {
     const addObjectItem = (type) => {
         setAddAnchorEl(null);
         selectService.selectActive(false);
+
+        if (item.get("filePaths")[type] === null) {
+            alertService.sendMessage("Error.", `선택하신 Layer Set 엔 ${type} 이(가) 존재하지 않습니다.`);
+            return;
+        }
         let temp = item.getSource().getFeatures().filter((feature) => {
             return feature.get("group") === type
         });
@@ -139,15 +149,63 @@ export default function LayerItem({ item }) {
         }));
         item.getSource().get("layerDrawSwitch")(type, maxID, item.get("layerIndex"), item.get("source"));
     }
+
+
+    const pushData = (feature: any, group: string, dataSet: Array<any>) => {
+        if (feature.get("group") === group) {
+            let data = feature.getProperties();
+            data.featureID = feature.getId();
+            delete data['source']; delete data['geometry']; delete data['featureID']; delete data['group'];
+            dataSet.push(data);
+        }
+    }
+    const saveObjectItem = (type) => {
+        setSaveAnchorEl(null);
+        let obejcts = [];
+        item.getSource().getFeatures().forEach((feature) => {
+            pushData(feature, type, obejcts);
+        });
+        console.log(type);
+        obejcts.sort(fnSort);
+        ipcRenderer.send("fileSave", { type: type, path: item.get("filePaths")[type], obejcts: obejcts });
+    }
+    const saveAllObjectItem = () => {
+        setSaveAnchorEl(null);
+        let obejcts = [];
+        Object.keys(item.get("filePaths")).forEach((key) => {
+            if (item.get("filePaths")[key] === null) return;
+            else {
+                let features = [];
+                item.getSource().getFeatures().forEach((feature) => {
+                    pushData(feature, key, features);
+                });
+                features.sort(fnSort);
+                obejcts.push({ type : key, path: item.get("filePaths")[key], obejcts : features})
+            }
+        });
+        // console.log(obejcts);
+
+        // let temp = item.getSource().getFeatures().filter((originFeature) => {
+        // return originFeature.get("group") === feature.get("group")
+        // });
+
+        // { type : type, path: item.get("filePaths")[type], obejcts : obejcts}
+        ipcRenderer.send("allFileSave", obejcts);
+    }
     useEffect(() => {
         let copySubscription;
         if (item.get("title") !== "브이월드") {
             if (item.get("zIndex") === map.getLayers().getLength() - 2) {
                 copySubscription = featureCopyService.getMessage().subscribe(message => {
+
+
                     let features = new GeoJSON().readFeatures(message.features);
                     let copyFeatures = [];
                     let updateFeatures = [];
                     features.forEach((feature) => {
+                        if (item.get("filePaths")[feature.get("group")] === null) {
+                            return;
+                        }
                         let temp = item.getSource().getFeatures().filter((originFeature) => {
                             return originFeature.get("group") === feature.get("group")
                         });
@@ -224,9 +282,11 @@ export default function LayerItem({ item }) {
                     setUpUnDoReDoIndex();
                 });
             }
-            ipcRenderer.on("addObject", (event, args) => {
-                addObjectItem(args);
-            });
+            if (item.get("zIndex") === (map.getLayers().getLength() - 2)) {
+                ipcRenderer.on("addObject", (event, args) => {
+                    addObjectItem(args);
+                });
+            }
         }
         return () => {
             copySubscription?.unsubscribe();
@@ -327,12 +387,9 @@ export default function LayerItem({ item }) {
                                         </IconButton>
                                     </Tooltip>
                                     <Menu open={addMenuOpen} anchorEl={addAnchorEl} onClose={addMenuHandleClose}>
-                                        <MenuItem onClick={() => addObjectItem('LAYER_LANESIDE')}>LaneSide</MenuItem>
-                                        <MenuItem onClick={() => addObjectItem('LAYER_LN_LINK')}>Link</MenuItem>
-                                        <MenuItem onClick={() => addObjectItem('LAYER_LN_NODE')}>Node</MenuItem>
-                                        <MenuItem onClick={() => addObjectItem('LAYER_POI')}>Poi</MenuItem>
-                                        <MenuItem onClick={() => addObjectItem('LAYER_ROADLIGHT')}>RoadLight</MenuItem>
-                                        <MenuItem onClick={() => addObjectItem('LAYER_ROADMARK')}>RoadMark</MenuItem>
+                                        {LayerNames.map((layerName) => {
+                                            if (item.get("filePaths")[layerName] !== null) return <MenuItem key={layerName} onClick={() => addObjectItem(layerName)}>{layerName}</MenuItem>
+                                        })}
                                     </Menu>
 
 
@@ -344,8 +401,10 @@ export default function LayerItem({ item }) {
                                         </IconButton>
                                     </Tooltip>
                                     <Menu open={saveMenuOpen} anchorEl={saveAnchorEl} onClose={saveMenuHandleClose}>
-                                        <MenuItem>Profile</MenuItem>
-                                        <MenuItem>Profile</MenuItem>
+                                        <MenuItem onClick={() => saveAllObjectItem()}>ALL Object</MenuItem>
+                                        {LayerNames.map((layerName) => {
+                                            if (item.get("filePaths")[layerName] !== null) return <MenuItem key={layerName} onClick={() => saveObjectItem(layerName)}>{layerName}</MenuItem>
+                                        })}
                                     </Menu>
                                 </>
                                 <Tooltip title="레이어 셋 제거">

@@ -25,11 +25,15 @@ import { MeasureCancle, MeasureClear, MeasureInit, MeasureStart } from './modify
 import ModifyEnd from './modify/ModifyEnd';
 import { setModifyStartUndo, setRedo, setUndo } from './modify/UndoRedo';
 import { alertService, featureCopyService, featureService, selectService } from './service/message.service';
+const Store = require('electron-store');
+
+const store = new Store();
 proj4.defs([
     ['EPSG:5186', '+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=600000 +epllps']
 ]);
 proj4.defs("EPSG:5186", "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=600000 +ellps=GRS80 +units=m +no_defs"); // 5186 좌표선언
 register(proj4);
+
 
 export const MOVE = "MOVE";
 export const EDIT = "EDIT";
@@ -255,6 +259,8 @@ function HdMap({ children, zoom, center }) {
     }, []);
     useEffect(() => {
         if (!map) return;
+
+        console.log(store);
         map.getView().setZoom(zoom);
     }, [zoom]);
     useEffect(() => {

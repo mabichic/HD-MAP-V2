@@ -8,7 +8,7 @@ import FeatureTable from "./Feature/FeatureTable";
 import HdMapStyle from "./HdMapStyle";
 import HdMapVectorLayer from "./layer/HdMapVectorLayer";
 import VworldTileLayer from "./layer/VworldTileLayer";
-import { featureService, layerService, loadingService } from './service/message.service';
+import { alertService, featureService, layerService, loadingService } from './service/message.service';
 import TestButton from "./TestButton";
 
 function compare(a: TileLayer<any>, b: TileLayer<any>) {
@@ -24,24 +24,27 @@ function Layers({ children }) {
     if (!map) return;
     setLayers([VworldTileLayer({ zIndex: 0, map: map })]);
     ipcRenderer.on("load", (event, args) => {
-      
-        
       let features = new GeoJSON().readFeatures(args);
       let source = new VectorSource({
         features: features
       });
-      features.forEach(feature=>{
+      features.forEach(feature => {
         feature.set("source", source);
       });
-      source.on("addfeature", (e)=>{ 
+      source.on("addfeature", (e) => {
         featureService.selected("featureAppend");
       });
 
-      setLayers(layers => [...layers, HdMapVectorLayer({ zIndex: map.getLayers().getLength()-1, map: map, source: source, style: HdMapStyle, title: 'Layer Set ' + args.index, layerIndex : args.index })].sort(compare));
+      setLayers(layers => [...layers, HdMapVectorLayer({ zIndex: map.getLayers().getLength() - 1, map: map, source: source, style: HdMapStyle, title: 'Layer Set ' + args.index, layerIndex: args.index, filePaths: args.filePaths })].sort(compare));
+      loadingService.sendMessage(false);
+    });
+    ipcRenderer.on("loadFail", (event, args) => {
+      alertService.sendMessage("Error.", args);
       loadingService.sendMessage(false);
     });
     return () => {
       ipcRenderer.removeAllListeners("load");
+      ipcRenderer.removeAllListeners("loadFail");
     }
   }, [map]);
   useEffect(() => {
@@ -73,7 +76,7 @@ function Layers({ children }) {
         });
         map.removeInteraction(message.layer.get("snap"));
         map.removeLayer(message.layer);
-        setShowTableLayers((layers)=>layers.filter((layer)=>{
+        setShowTableLayers((layers) => layers.filter((layer) => {
           return layer != message.layer;
         }));
       }
@@ -91,9 +94,9 @@ function Layers({ children }) {
         let arr = showTableLayers;
         if (!showTableLayers.includes(message.layer)) arr.push(message.layer);
         setShowTableLayers([...arr]);
-      }else if(message.state ==="unvisible"){
+      } else if (message.state === "unvisible") {
         let arr = showTableLayers;
-        setShowTableLayers((layers) => layers.filter((layer)=>{
+        setShowTableLayers((layers) => layers.filter((layer) => {
           return layer != message.layer;
         }));
       }
@@ -107,7 +110,7 @@ function Layers({ children }) {
       <TestButton layers={layers} />
       <div ref={wrapRef}>
         {showTableLayers.map((layer) => {
-          console.log(layer.getSource());
+          console.log(layer);
           return <FeatureTable key={layer.get('title')} source={layer.getSource()} wrapRef={wrapRef} title={layer.get('title')} layer={layer} />
         })}
       </div>

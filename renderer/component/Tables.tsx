@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import { Rnd } from "react-rnd";
-import FeatureItem from "./Feature/FeatureItem";
-import { featureService } from "./service/message.service";
 import CloseIcon from '@mui/icons-material/Close';
 import { IconButton, ListItem, ListItemIcon, ListItemText, SvgIcon } from "@mui/material";
-import Layer_icon from '../public/images/layer_icon.svg'
+import { useEffect, useRef, useState } from "react";
+import { Rnd } from "react-rnd";
+import Layer_icon from '../public/images/layer_icon.svg';
+import FeatureItem from "./Feature/FeatureItem";
+import { featureService } from "./service/message.service";
 const Test = ({ source, wrapRef, title, layer, state }) => {
     useEffect(() => {
         return () => {
@@ -42,7 +42,7 @@ const Test = ({ source, wrapRef, title, layer, state }) => {
         }}
             onMouseDown={gridClick}
         >
-            <Rnd minWidth={630} minHeight={400} bounds="body" default={{ x: 400, y: 400, width: 200, height: 200, }} style={style} dragHandleClassName="featureHandle">
+            <Rnd minWidth={1000} minHeight={400} bounds="body" default={{ x: 400, y: 400, width: 200, height: 200, }} style={style} dragHandleClassName="featureHandle">
                 <div className="featureHandle" style={{ width: '100%', display: "flex", cursor: "move", backgroundColor: "#30459A" }}>
                     <ListItem sx={{ paddingTop: '3px', paddingBottom: '3px' }}>
                         <ListItemIcon sx={{ fontSize: 10, minWidth: '30px' }}>

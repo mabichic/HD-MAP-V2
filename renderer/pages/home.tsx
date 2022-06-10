@@ -1,18 +1,14 @@
-import { useEffect, useState } from 'react';
 import { ipcRenderer } from 'electron';
-import HdMap from '../component/HdMap';
-import { layerState } from '../state/Layer';
 import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
-import VworldTileLayer from '../component/layer/VworldTileLayer';
-import Layers from '../component/Layers';
+import { useEffect, useState } from 'react';
+import AlertDialog from '../component/AlertDialog';
 import ConfirmDialog from '../component/ConfirmDialog';
+import HdMap from '../component/HdMap';
+import Layers from '../component/Layers';
 import Loading from '../component/Loading';
 import { loadingService } from '../component/service/message.service';
-import AlertDialog from '../component/AlertDialog';
-const Store = require('electron-store');
 
-const store = new Store();
 function Home() {
   const [layers, setLayers] = useState([new TileLayer({
     source: new XYZ({
@@ -23,14 +19,14 @@ function Home() {
   const [verCtorLayer, setVerCtorLayer] = useState([]);
 
 
-  const test = async () => {
-    const foo = await ipcRenderer.invoke('getStoreValue', 'foo');
-    store.set('unicorn', '🦄');
-    store.set('port', 4326);
-  }
-  const test2 = async () => {
+  // const test = async () => {
+  //   const foo = await ipcRenderer.invoke('getStoreValue', 'foo');
+  //   store.set('unicorn', '🦄');
+  //   store.set('port', 4326);
+  // }
+  // const test2 = async () => {
 
-  }
+  // }
   useEffect(()=>{
     ipcRenderer.on("ladingStart", (event, args) => {
       loadingService.sendMessage(true);

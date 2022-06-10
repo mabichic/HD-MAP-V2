@@ -17,7 +17,7 @@ export function HDMapMenu(mainWindow: BrowserWindow, store:any):Array<(MenuItemC
           },
           {
             label: "Load File",
-            click: () => LoadFile(store),
+            click: () => LoadFile(mainWindow,store),
           },
           {
             label: "GPS File Load",
@@ -131,6 +131,11 @@ export function HDMapMenu(mainWindow: BrowserWindow, store:any):Array<(MenuItemC
             label: "RoadMark",
             click: (e) => {AddObject(mainWindow, store,"LAYER_ROADMARK")},
             accelerator : "ctrl+6"
+          },
+          {
+            label: "SafePoint",
+            click: (e) => {AddObject(mainWindow, store,"LAYER_SAFEPOINT")},
+            accelerator : "ctrl+7"
           },
         ],
       },

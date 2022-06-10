@@ -28,6 +28,8 @@ export interface UndoRedoType {
 export const undoDatas: Array<UndoRedoType | null> = [];
 export const redoDatas: Array<UndoRedoType | null> = [];
 export const setUndo = () => {
+
+  console.log(undoDatas);
   let length = undoDatas.length;
   let tempIndex = getUnDoReDoIndex() - 1;
 
