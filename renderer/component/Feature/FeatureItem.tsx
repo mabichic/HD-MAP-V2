@@ -41,6 +41,7 @@ function TabPanel(props: TabPanelProps) {
                 source={source}
                 columnDefs={header}
                 type={type}
+                visible={value !== index}
             />
         </div>
     );
@@ -178,30 +179,7 @@ export default function FeatureItem({ index, source }) {
             }
 
         });
-        // let subscription = featureService.getMessage().subscribe(message => {
-        //     if (message.state === "featureChange") {
-        //         console.log(message);
-        //         message.features.forEach((fea)=>{
-        //             // console.log(source.getFeatureById(fea.getId()));
-        //             // console.log(gridRef.current.api.getRowNode(fea.getId()));
-        //             let rowNode = gridRef.current.api.getRowNode(fea.getId());
-        //             if(typeof rowNode === 'undefined') return ; 
-        //             rowNode.setDataValue('PointXY', fea.getGeometry().getFlatCoordinates());
-        //             if(fea.getGeometry().getType()!=="Point"){
-        //                 rowNode.setDataValue('NumPoint', fea.get("NumPoint"));
-        //             }
-        //             columnDefs.forEach((field)=>{
-        //                 console.log(field.field);
-        //                 if(field.field==="LinkID")  rowNode.setDataValue('LinkID', fea.get("LinkID"));
-        //                 if(field.field==="NumConLink")  rowNode.setDataValue('NumConLink', fea.get("NumConLink"));
-        //                 if(field.field==="SNodeID")  rowNode.setDataValue('SNodeID', fea.get("SNodeID"));
-        //                 if(field.field==="ENodeID")  rowNode.setDataValue('ENodeID', fea.get("ENodeID"));
-        //             });
-        //             console.log(columnDefs);
-        //         });
-        //     }
-
-        // });
+        
 
         return () => {
             subscription.unsubscribe();

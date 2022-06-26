@@ -45,7 +45,5 @@ app.on("window-all-closed", () => {
 
 
 ipcMain.handle("getStoreValue", (event, key) => {
-  console.log(key);
-
   return store.get(key);
 });

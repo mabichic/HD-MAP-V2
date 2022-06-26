@@ -1,8 +1,8 @@
-import { idCheck } from "./FeatureHader";
+import { idCheck, pointXYCheck } from "./FeatureHader";
 
 export const LayerLnNodeHader = [
-    { field: "ID",valueSetter: idCheck, },
+    { field: "ID",valueParser: idCheck, },
     { field: "NumConLink" ,editable: false,},
     { field: "LinkID" ,editable: false,},
-    { field: "PointXY" ,editable: false,},
+    { field: "PointXY", editable: true, cellEditor: "agLargeTextCellEditor", cellEditorPopup: true , valueParser: pointXYCheck},
 ]

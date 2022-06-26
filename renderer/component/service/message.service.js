@@ -3,6 +3,7 @@ import { Subject } from "rxjs";
 const feautreSubject = new Subject();
 const layerSubject = new Subject();
 const confirmSubject = new Subject();
+const confirmValueSubject = new Subject();
 const alertSubject = new Subject();
 const loadingSubject = new Subject();
 const selectSubject = new Subject();
@@ -25,11 +26,15 @@ export const layerService = {
 };
 
 export const confrimService = {
-  sendMessage: (state, message, onConfirm, onCancel) => confirmSubject.next({ state: state, text: message, onConfirm: onConfirm, onCancel: onCancel }),
+  sendMessage: (state, message, onConfirm, onCancel) => confirmSubject.next({ state: state, text: message, onConfirm: onConfirm, onCancel: onCancel}),
   clearMessages: () => confirmSubject.next(),
   getMessage: () => confirmSubject.asObservable(),
 };
-
+export const confrimValueService = {
+  sendMessage: (state, message, onConfirm, onCancel, value, item) => confirmValueSubject.next({ state: state, text: message, onConfirm: onConfirm, onCancel: onCancel  , value: value, item:item}),
+  clearMessages: () => confirmValueSubject.next(),
+  getMessage: () => confirmValueSubject.asObservable(),
+};
 export const alertService = {
   sendMessage: (state, message) => alertSubject.next({ state: state, text: message }),
   clearMEssage: () => alertSubject.next(),

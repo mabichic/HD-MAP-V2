@@ -1,33 +1,17 @@
-import { getUnDoReDoIndex, UndoPush } from "../../modify/UndoRedo";
 import { alertService, featureService } from "../../service/message.service";
-
-export default function LinkID(params, subscription, source) {
+export default function SafePointLinkID(params, subscription, source) {
   subscription = featureService.getMessage().subscribe((message) => {
     if (message.state === "linkIDSSelected") {
       if (source.getFeatureByUid(message.features[0].ol_uid) !== null) {
-        if (params.node.data.ID === message.features[0].get("ID")) {
-          alertService.sendMessage("Error.", "자기 자신을 Link ID로 등록 할 수 없습니다.");
-          message.select.getFeatures().clear();
-          subscription.unsubscribe();
-          params.api.stopEditing();
-        } else if (params.value === message.features[0].get("ID")) {
+        if (params.value === message.features[0].get("ID")) {
           alertService.sendMessage("Error.", "이미 등록된 Link ID입니다.");
           message.select.getFeatures().clear();
           subscription.unsubscribe();
           params.api.stopEditing();
         } else {
           const instances = params.api.getCellEditorInstances();
-
           if (instances?.length > 0) {
             instances[0].eInput.value = message.features[0].get("ID");
-            let f = message.features[0];
-            let target = f;
-            let prevTarget = f.clone();
-            if (params.colDef.field === "RLinkID") f.set("LLinkID", params.data.ID);
-            else if (params.colDef.field === "LLinkID") f.set("RLinkID", params.data.ID);
-
-            let nextTarget = f.clone();
-            UndoPush("UPDATE", target.get("source"), target, prevTarget, nextTarget, getUnDoReDoIndex());
           }
           message.select.getFeatures().clear();
           message.select.getFeatures().push(source.getFeatureById(params.data.featureID));

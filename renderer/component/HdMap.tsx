@@ -17,6 +17,10 @@ import Fill from 'ol/style/Fill';
 import Stroke from 'ol/style/Stroke';
 import Style from 'ol/style/Style';
 import proj4 from 'proj4';
+import { colourMappings, lanesideTypeMappings } from './Feature/header/Laneside';
+import { linkSubTypeMappings, linkTwowayMappings, linkTypeMappings } from './Feature/header/Link';
+import { roadlightDivMappings, roadlightSubTypeMappings, roadlightTypeMappings } from './Feature/header/Roadlight';
+import { roadmarkSubTypeMappings, roadmarkTypeMappings } from './Feature/header/RoadMark';
 import styles from './HdMap.module.css';
 import { selectedStyle } from './HdMapStyle';
 import BoxEnd from './modify/BoxEnd';
@@ -155,11 +159,25 @@ function HdMap({ children, zoom, center }) {
                 Object.keys(feature.getProperties()).forEach((key) => {
                     if (key === 'geometry' || key === 'PointXY' || key === 'source' || key === 'Index') return;
                     txt[key] = feature.get(key);
+                    if(feature.get("group")==="LAYER_LANESIDE"){ 
+                        if(key==="Type")    txt[key] = lanesideTypeMappings[feature.get(key)];
+                        if(key==="Color")   txt[key] = colourMappings[feature.get(key)];
+                    }
+                    if(feature.get("group")==="LAYER_LN_LINK"){ 
+                        if(key==="Type")    txt[key] = linkTypeMappings[feature.get(key)];
+                        if(key==="SubType")   txt[key] = linkSubTypeMappings[feature.get(key)];
+                        if(key==="Twoway")   txt[key] = linkTwowayMappings[feature.get(key)];
+                    }
+                    if(feature.get("group")==="LAYER_ROADLIGHT"){ 
+                        if(key==="Type")    txt[key] = roadlightTypeMappings[feature.get(key)];
+                        if(key==="SubType")   txt[key] = roadlightSubTypeMappings[feature.get(key)];
+                        if(key==="Div")   txt[key] = roadlightDivMappings[feature.get(key)];
+                    }
+                    if(feature.get("group")==="LAYER_ROADMARK"){ 
+                        if(key==="Type")    txt[key] = roadmarkTypeMappings[feature.get(key)];
+                        if(key==="SubType")   txt[key] = roadmarkSubTypeMappings[feature.get(key)];
+                    }
                 });
-                // feature.getKeys().forEach(key => {
-                // if (key === 'geometry') return;
-                // txt[key] = feature.get(key);
-                // });
                 setContent(() => (txt));
                 overlay.setPosition(coordinate);
             } else {
@@ -196,6 +214,7 @@ function HdMap({ children, zoom, center }) {
                 featureService.stopLineIdSelected("stopIDSSelected", stopIDS, select);
             }
             if (linkIDS.length > 0) {
+                console.log(linkIDS);
                 featureService.linkIdSelected("linkIDSSelected", linkIDS, select);
             }
             if (select.getFeatures().getLength() > 0) featureService.selected("selected", features);
@@ -259,8 +278,6 @@ function HdMap({ children, zoom, center }) {
     }, []);
     useEffect(() => {
         if (!map) return;
-
-        console.log(store);
         map.getView().setZoom(zoom);
     }, [zoom]);
     useEffect(() => {

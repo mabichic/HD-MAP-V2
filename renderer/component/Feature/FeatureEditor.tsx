@@ -22,7 +22,6 @@ const style = {
 function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
     const [value, setValue] = useState("");
     const [field, setField] = useState(fields[0].colId)
-    console.log(type);
     const ValueField = () => {  
         let menu;
         if (field === "Type" || field === "Color") {
@@ -55,12 +54,7 @@ function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
         }
     }
     const valueChange = useCallback((e) => {
-        console.log(gridRef.current.api);
-        console.log(gridRef.current.api.getSelectedNodes());
-        console.log(value);
-
         gridRef.current.api.getSelectedNodes().forEach((node) => {
-            // console.log(node.data.featureID);
             let feature = source.getFeatureById(node.data.featureID);
             let prevFeature = feature.clone();
             let data = { field: field, data: value };

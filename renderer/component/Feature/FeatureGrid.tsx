@@ -3,10 +3,12 @@ import { AgGridReact } from "ag-grid-react";
 import VectorSource from "ol/source/Vector";
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import MapContext from "../context/MapContext";
+import DeleteFeature from "../modify/Delete";
 import { getUnDoReDoIndex, setUpUnDoReDoIndex, UndoPush } from "../modify/UndoRedo";
 import { alertService, featureService, loadingService } from "../service/message.service";
 import FeatureEditor from "./FeatureEditor";
 import LinkID from "./service/LinkID";
+import SafePointLinkID from "./service/SafePointLinkID";
 import StopLineID from "./service/StopLineID";
 
 
@@ -14,14 +16,15 @@ interface FeatureGridProps {
     feature: Array<any>;
     source: VectorSource;
     columnDefs: Array<any>;
-    type:string;
+    type: string;
+    visible: boolean;
 }
 
 const exclusionFieldList = ['ID', 'PointXY', 'NumPoint', 'LID', 'RID', 'InMID', 'InLID', 'InRID', 'outMID', 'outLID', 'outRID', 'RLID', 'LLinkID', 'RLinkID', 'SNodeID', 'ENodeID', 'NumConLink', 'LinkID', 'NumStopLine'];
 
 export default function FeatureGrid({
     feature,
-    source, columnDefs, type }: FeatureGridProps) {
+    source, columnDefs, type, visible }: FeatureGridProps) {
     const map = useContext(MapContext);
     const [open, setOpen] = useState(false);
     const [fields, setFields] = useState([]);
@@ -75,6 +78,22 @@ export default function FeatureGrid({
             minWidth: 150,
         };
     }, []);
+    const deleteFeature = useCallback(() => {
+        let feautes = [];
+        gridApi.getSelectedRows().forEach((row) => {
+            feautes.push(row.featureID);
+        });
+        if (feautes.length < 1) {
+            alertService.sendMessage("Error.", `선택하신 객체가 없습니다.`);
+            return;
+        }
+        let filteredFeatures = source.getFeatures().filter(fea => {
+            return feautes.includes(fea.getId());
+        });
+
+        DeleteFeature(filteredFeatures);
+    }, [gridApi]);
+
     useEffect(() => {
         loadingService.sendMessage(true);
         return () => {
@@ -90,6 +109,12 @@ export default function FeatureGrid({
         };
     }, [gridApi]);
 
+    useEffect(() => {
+        return () => {
+
+            if (!visible && gridApi) gridApi.stopEditing();
+        }
+    }, [visible, gridApi])
     const zoomToFeatures = () => {
         let feautes = [];
         gridApi.getSelectedRows().forEach((row) => {
@@ -125,17 +150,18 @@ export default function FeatureGrid({
     });
 
     const onCellEditingStarted = (params) => {
-        console.log(params.colDef.field);
         if (params.colDef.field === "StopLineID") {
             StopLineID(params, subscription, source);
         } else if (params.colDef.field === "RLinkID" || params.colDef.field === "LLinkID") {
             LinkID(params, subscription, source);
+        } else if (params.colDef.field === "QueryLinkID" || params.colDef.field === "InterLinkID") {
+            SafePointLinkID(params, subscription, source);
         }
     }
     const onCellEditingStopped = (e) => {
         if (subscription !== null) subscription.unsubscribe();
         if (e.oldValue === e.newValue) return;
-        if(typeof  e.newValue === "undefined") return ;
+        if (typeof e.newValue === "undefined") return;
 
         // const dataId = e.colDef.field === "ID" ? e.oldValue : e.node.data.ID;
 
@@ -177,14 +203,14 @@ export default function FeatureGrid({
 
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {open &&
-                <FeatureEditor handleClose={handleClose} open={open} fields={fields} gridRef={gridRef} source = { source } type={type}/>
+                <FeatureEditor handleClose={handleClose} open={open} fields={fields} gridRef={gridRef} source={source} type={type} />
             }
             <div style={{ textAlign: 'right', backgroundColor: 'white', paddingTop: '5px' }}>
                 <Button variant="outlined" onClick={selectAll} color="inherit" size="small" style={{ marginRight: '8px' }}>전체 선택</Button>
                 <Button variant="outlined" onClick={deselectAll} color="inherit" size="small" style={{ marginRight: '8px' }}>전체 선택해제</Button>
                 <Button variant="outlined" onClick={zoomToFeatures} color="secondary" size="small" style={{ marginRight: '8px' }}>위치로 이동</Button>
                 <Button variant="outlined" onClick={handleOpen} color="success" size="small" style={{ marginRight: '8px' }}>선택 필드 수정</Button>
-                <Button variant="outlined" onClick={handleOpen} color="error" size="small" style={{ marginRight: '20px' }}>삭제</Button>
+                <Button variant="outlined" onClick={deleteFeature} color="error" size="small" style={{ marginRight: '20px' }}>삭제</Button>
             </div>
             <div className="ag-theme-alpine" style={{ flexGrow: 1, width: '100%', padding: '20px', paddingTop: '13px', backgroundColor: 'white' }}>
                 <AgGridReact

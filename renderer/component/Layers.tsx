@@ -34,17 +34,22 @@ function Layers({ children }) {
       source.on("addfeature", (e) => {
         featureService.selected("featureAppend");
       });
-
-      setLayers(layers => [...layers, HdMapVectorLayer({ zIndex: map.getLayers().getLength() - 1, map: map, source: source, style: HdMapStyle, title: 'Layer Set ' + args.index, layerIndex: args.index, filePaths: args.filePaths })].sort(compare));
+      if(args?.hdSet===true)  setLayers(layers => [...layers, HdMapVectorLayer({ zIndex: map.getLayers().getLength() - 1, map: map, source: source, style: HdMapStyle, title: 'Layer Set ' + args.index, layerIndex: args.index, filePaths: args.filePaths, hdSet:args?.hdSet })].sort(compare));
+      else setLayers(layers => [...layers, HdMapVectorLayer({ zIndex: map.getLayers().getLength() - 1, map: map, source: source, style: HdMapStyle, title: 'GPS Log Set ' + args.index, layerIndex: args.index, filePaths: args.filePaths, hdSet:args?.hdSet })].sort(compare));
       loadingService.sendMessage(false);
     });
     ipcRenderer.on("loadFail", (event, args) => {
       alertService.sendMessage("Error.", args);
       loadingService.sendMessage(false);
     });
+    ipcRenderer.on("saved", (event, args) => {
+      alertService.sendMessage("Saved.", args);
+      loadingService.sendMessage(false);
+    });
     return () => {
       ipcRenderer.removeAllListeners("load");
       ipcRenderer.removeAllListeners("loadFail");
+      ipcRenderer.removeAllListeners("saved");
     }
   }, [map]);
   useEffect(() => {
@@ -110,7 +115,6 @@ function Layers({ children }) {
       <TestButton layers={layers} />
       <div ref={wrapRef}>
         {showTableLayers.map((layer) => {
-          console.log(layer);
           return <FeatureTable key={layer.get('title')} source={layer.getSource()} wrapRef={wrapRef} title={layer.get('title')} layer={layer} />
         })}
       </div>

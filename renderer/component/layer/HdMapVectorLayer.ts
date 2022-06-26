@@ -2,7 +2,7 @@ import { Snap } from "ol/interaction";
 import { Vector } from "ol/layer";
 import LayerDraw from "./draw/LayerDraw";
 
-const HdMapVectorLayer = ({ source, style, title, zIndex = 0, map, layerIndex, filePaths }) => {
+const HdMapVectorLayer = ({ source, style, title, zIndex = 0, map, layerIndex, filePaths, hdSet }) => {
   let snap = new Snap({
     source: source,
   });
@@ -17,6 +17,7 @@ const HdMapVectorLayer = ({ source, style, title, zIndex = 0, map, layerIndex, f
       snap: snap,
       layerIndex : layerIndex,
       filePaths : filePaths,
+      hdSet : hdSet, 
     },
     zIndex: map.getLayers().getLength()-1,
   });

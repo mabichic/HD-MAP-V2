@@ -4,6 +4,7 @@ import XYZ from 'ol/source/XYZ';
 import { useEffect, useState } from 'react';
 import AlertDialog from '../component/AlertDialog';
 import ConfirmDialog from '../component/ConfirmDialog';
+import ConfirmValueDialog from '../component/ConfirmValueDialog';
 import HdMap from '../component/HdMap';
 import Layers from '../component/Layers';
 import Loading from '../component/Loading';
@@ -44,6 +45,7 @@ function Home() {
         <Layers>
         </Layers>
         <ConfirmDialog/>
+        <ConfirmValueDialog/>
         <AlertDialog/>
         <Loading/>
       </HdMap> 

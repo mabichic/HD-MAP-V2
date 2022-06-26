@@ -78,8 +78,6 @@ const layerDrawStart = (evt) => {
 }
 
 const layerDrawEnd = (evt, draw: Draw, type: String, maxID: number, layerIndex: number, source: VectorSource) => {
-
-    console.log(source);
     draw.setActive(false);
     selectService.selectActive(true);
     if (!isFinite(maxID)) maxID = 1;

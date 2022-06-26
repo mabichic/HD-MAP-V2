@@ -25,7 +25,6 @@ export function extractValues(mappings: Record<number, string>) {
 }
 
 export function valueToArry(params) {
-  console.log(params);
   if(params.newValue===params.oldValue) return params.oldValue;
   if (!pattern_eng.test(params.newValue) && !pattern_spc.test(params.newValue) && !pattern_kor.test(params.newValue)) {
     
@@ -49,9 +48,16 @@ export function valueToArry(params) {
 export function arrayValueSetter(params) {}
 
 export function idCheck(params) {
+  if(params.newValue.trim()===""){
+    alertService.sendMessage("Error.", "값이 입력되지 않았습니다.");
+    return params.oldValue;
+  }
   var newValue = Number(params.newValue);
   if (isNaN(newValue)) {
     alertService.sendMessage("Error.", "숫자만 입력 할 수 있습니다.");
+    return params.oldValue;
+  }else if(newValue<1){
+    alertService.sendMessage("Error.", "ID는 1보다 작을 수 없습니다.");
     return params.oldValue;
   } else if (newValue === params.oldValue) {
     alertService.sendMessage("Error.", "입력하신 값과 이전 값이 동일합니다.");
@@ -64,6 +70,9 @@ export function idCheck(params) {
       return params.oldValue;
     }
   }
+}
+export function pointXYCheck(params){ 
+  return params.oldValue;
 }
 export function numberCheck(params) {
   var newValue = Number(params.newValue);
@@ -93,6 +102,7 @@ export function linkIdCheck (params){
     }
   }
 }
+
 export function linkIdCheckNoSelf (params){ 
   var newValue = Number(params.newValue);
   if (isNaN(newValue)) {
@@ -102,7 +112,7 @@ export function linkIdCheckNoSelf (params){
     // alertService.sendMessage("Error.", "입력하신 값과 이전 값이 동일합니다.");
     return params.oldValue;
   } else {
-    if (params.data.source.getFeatureById(params.data.group + params.data.Index + "_" + params.newValue) === null) {
+    if (params.data.source.getFeatureById("LAYER_LN_LINK" + params.data.Index + "_" + params.newValue) === null) {
       alertService.sendMessage("Error.", "해당하는 Link ID를 가진 오브젝트가 없습니다.");
       return params.oldValue;
     }else {

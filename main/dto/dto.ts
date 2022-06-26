@@ -45,7 +45,7 @@ export interface LAYER_LN_LINK_PROPERTIE {
   outRID: number;
   Junction: number;
   Type: number;
-  Sub_Type: number;
+  SubType: number;
   Twoway: number;
   RLID: number;
   LLinkID: number;
@@ -99,7 +99,7 @@ export interface LAYER_SAFEPOINT_PROPERTIE {
 
 export interface GPS_LOG_PROPERTIE {
   ID: number;
-  PointXY: Array<number>;
+  PointXY: Array<Array<number>>;
 }
 
 export class LAYER_LANESIDE implements LAYER_LANESIDE_PROPERTIE {
@@ -156,7 +156,7 @@ export class LAYER_LN_LINK implements LAYER_LN_LINK_PROPERTIE {
   outRID: number;
   Junction: number;
   Type: number;
-  Sub_Type: number;
+  SubType: number;
   Twoway: number;
   RLID: number;
   LLinkID: number;
@@ -181,7 +181,7 @@ export class LAYER_LN_LINK implements LAYER_LN_LINK_PROPERTIE {
     this.outRID = Number(array.split(" ")[9]);
     this.Junction = Number(array.split(" ")[10]);
     this.Type = Number(array.split(" ")[11]);
-    this.Sub_Type = Number(array.split(" ")[12]);
+    this.SubType = Number(array.split(" ")[12]);
     this.Twoway = Number(array.split(" ")[13]);
     this.RLID = Number(array.split(" ")[14]);
     this.LLinkID = Number(array.split(" ")[15]);
@@ -207,7 +207,7 @@ export class LAYER_LN_LINK_CONV implements LAYER_LN_LINK_PROPERTIE {
   outRID: number;
   Junction: number;
   Type: number;
-  Sub_Type: number;
+  SubType: number;
   Twoway: number;
   RLID: number;
   LLinkID: number;
@@ -232,7 +232,7 @@ export class LAYER_LN_LINK_CONV implements LAYER_LN_LINK_PROPERTIE {
     this.outRID = Number(data.outRID);
     this.Junction = Number(data.Junction);
     this.Type = Number(data.Type);
-    this.Sub_Type = Number(data.Sub_Type);
+    this.SubType = Number(data.Sub_Type);
     this.Twoway = Number(data.Twoway);
     this.RLID = Number(data.RLID);
     this.LLinkID = Number(data.LLinkID);
@@ -268,7 +268,7 @@ export class LAYER_LN_LINK_CONV implements LAYER_LN_LINK_PROPERTIE {
     " " +
     this.Type +
     " " +
-    this.Sub_Type +
+    this.SubType +
     " " +
     this.Twoway +
     " " +
@@ -479,8 +479,8 @@ export class LAYER_ROADMARK_CONV implements LAYER_ROADMARK_PROPERTIE {
   Index: number;
   constructor(data) {
     this.ID = Number(data.ID);
-    this.Type =Number(data.Type);
-    this.SubType =Number(data.SubType);
+    this.Type = Number(data.Type);
+    this.SubType = Number(data.SubType);
     this.NumStopLine = Number(data.NumStopLine);
     this.StopLineID = data.StopLineID.join(" ");
     this.NumPoint = Number(data.NumPoint);
@@ -542,4 +542,16 @@ export class LAYER_SAFEPOINT_CONV implements LAYER_SAFEPOINT_PROPERTIE {
     result += "\r\n";
     return result;
   };
+}
+
+export class GPS_LOG implements GPS_LOG_PROPERTIE {
+  ID: number;
+  PointXY: Array<Array<number>>;
+  group: "GPS_LOG";
+  Index: number;
+  constructor(ID, array) {
+    this.ID = Number(ID);
+    this.PointXY = division(array.map(parseFloat), 2);
+    this.group = "GPS_LOG";
+  }
 }

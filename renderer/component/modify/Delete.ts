@@ -1,4 +1,5 @@
 import { Feature } from "ol";
+import { featureService } from "../service/message.service";
 import { getUnDoReDoIndex, setInitRedo, setUpUnDoReDoIndex, UndoPush } from "./UndoRedo";
 
 export default function DeleteFeature(features: Array<Feature>) {
@@ -43,6 +44,7 @@ export default function DeleteFeature(features: Array<Feature>) {
     }
     UndoPush("DELETE", feature.get("source"), feature, null, null, getUnDoReDoIndex());
   });
+  featureService.selected("featureChange", null);
   setInitRedo();
   setUpUnDoReDoIndex();
 }

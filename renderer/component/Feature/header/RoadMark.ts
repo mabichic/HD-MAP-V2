@@ -1,6 +1,6 @@
-import { extractValues, lookupValue, valueToArry } from "./FeatureHader";
+import { extractValues, idCheck, lookupValue, pointXYCheck, valueToArry } from "./FeatureHader";
 
-const typeMappings = {
+export const roadmarkTypeMappings = {
   0: "TYPE_NONE",
   1: "RM_CROSSWALK",
   2: "RM_SPEEDBUMP",
@@ -12,7 +12,7 @@ const typeMappings = {
   8: "RM_BUSSTOP",
   9: "RM_VIRTUAL_STOPLINE",
 };
-const subTypeMappings = {
+export const roadmarkSubTypeMappings = {
   0: "TYPE_NONE",
   1: "RM_ARROW_S",
   2: "RM_ARROW_L",
@@ -32,10 +32,10 @@ const subTypeMappings = {
 const stopLineIDCount = (params) => {
   return params.data.StopLineID.length;
 };
-const types = extractValues(typeMappings);
-const subTypes = extractValues(subTypeMappings);
+const types = extractValues(roadmarkTypeMappings);
+const subTypes = extractValues(roadmarkSubTypeMappings);
 export const LayerRoadmarkHader = [
-  { field: "ID" },
+  { field: "ID", valueParser: idCheck, },
   {
     field: "Type",
     cellEditor: "agSelectCellEditor",
@@ -44,11 +44,11 @@ export const LayerRoadmarkHader = [
     },
     filterParams: {
       valueFormatter: function (params) {
-        return lookupValue(typeMappings, params.value);
+        return lookupValue(roadmarkTypeMappings, params.value);
       },
     },
     valueFormatter: function (params) {
-      return lookupValue(typeMappings, params.value);
+      return lookupValue(roadmarkTypeMappings, params.value);
     },
   },
   {
@@ -59,23 +59,20 @@ export const LayerRoadmarkHader = [
     },
     filterParams: {
       valueFormatter: function (params) {
-        return lookupValue(subTypeMappings, params.value);
+        return lookupValue(roadmarkSubTypeMappings, params.value);
       },
     },
     valueFormatter: function (params) {
-      return lookupValue(subTypeMappings, params.value);
+      return lookupValue(roadmarkSubTypeMappings, params.value);
     },
   },
   { field: "NumStopLine", editable: false, valueGetter: stopLineIDCount },
   {
     field: "StopLineID",
-    // valueFormatter: function (params) {
-    //   console.log(params.value);
-    //   return valueToArry(params.value);
-    // },
+
     valueParser: valueToArry,
 
   },
   { field: "NumPoint", editable: false },
-  { field: "PointXY", editable: false },
+  { field: "PointXY", editable: true, cellEditor: "agLargeTextCellEditor", cellEditorPopup: true , valueParser: pointXYCheck},
 ];

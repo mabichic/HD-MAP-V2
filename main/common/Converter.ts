@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { GEOJSONTYPE, LAYER_LANESIDE, LAYER_LN_LINK, LAYER_LN_NODE, LAYER_POI, LAYER_ROADLIGHT, LAYER_ROADMARK, LAYER_SAFEPOINT } from "../dto/dto";
+import { GEOJSONTYPE, GPS_LOG, LAYER_LANESIDE, LAYER_LN_LINK, LAYER_LN_NODE, LAYER_POI, LAYER_ROADLIGHT, LAYER_ROADMARK, LAYER_SAFEPOINT } from "../dto/dto";
 
 const objectSet = {
   LAYER_ROADMARK: LAYER_ROADMARK,
@@ -28,7 +28,7 @@ export default function Converter(layerNM, index: number, dataSet: Array<any>, f
       geoType = "Polygon";
       break;
   }
-  
+
   readFileSync(filePath, "utf-8")
     .split("\r\n")
     .forEach((array) => {
@@ -48,4 +48,32 @@ export default function Converter(layerNM, index: number, dataSet: Array<any>, f
       };
       dataSet.push(geson);
     });
+}
+
+export function ConverterGpsLog(layerNM, index: number, dataSet: Array<any>, filePath: string, splitText: string) {
+  let pointXY = [];
+
+  readFileSync(filePath, "utf-8")
+    .split("\r\n")
+    .forEach((array) => {
+      array = array.trim();
+      if (array === "") return;
+      array.split(splitText).forEach((cor) => {
+        pointXY.push(Number(cor));
+      });
+    });
+
+  let obj = new GPS_LOG(0, pointXY);
+  obj.Index = index;
+  let geson: GEOJSONTYPE = {
+    type: "Feature",
+    group: layerNM,
+    id: layerNM + index + "_" + obj.ID,
+    geometry: {
+      type: "LineString",
+      coordinates: obj.PointXY,
+    },
+    properties: obj,
+  };
+  dataSet.push(geson);
 }

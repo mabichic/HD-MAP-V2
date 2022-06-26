@@ -17,7 +17,6 @@ export default function StopLineID(params,subscription, source) {
                   return a - b;
                 })
                 .join(",");
-                console.log(instances[0].eInput.value);
             }
             
             subscription.unsubscribe();
@@ -25,7 +24,6 @@ export default function StopLineID(params,subscription, source) {
             message.select.getFeatures().push(source.getFeatureById(params.data.featureID));
             params.api.stopEditing();
           } else {
-            console.log(source===message.features[0]); 
   
             alertService.sendMessage("Error.", "이미 등록된 Stop Line ID 입니다");
             message.select.getFeatures().clear();

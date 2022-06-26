@@ -8,9 +8,7 @@ import { featureService } from "./service/message.service";
 const Test = ({ source, wrapRef, title, layer, state }) => {
     useEffect(() => {
         return () => {
-            console.log("이건안되나");
             state((value) => {
-                console.log("밸류가 몇일까");
                 return value - 1
             });
         }

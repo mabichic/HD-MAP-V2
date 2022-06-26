@@ -7,7 +7,7 @@ import { Box, FormGroup, FormLabel, IconButton, ListItem, ListItemIcon, ListItem
 import { styled } from "@mui/system";
 import { MouseEvent, useContext, useEffect, useState } from "react";
 import OpacityIcon from '../../public/images/opacity _icon.svg';
-import { alertService, confrimService, featureCopyService, featureService, layerService } from "../service/message.service";
+import { alertService, confrimService, confrimValueService, featureCopyService, featureService, layerService } from "../service/message.service";
 
 
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
@@ -21,6 +21,7 @@ import { ipcRenderer } from "electron";
 import GeoJSON from "ol/format/GeoJSON";
 import { setCopyUndo, setUpUnDoReDoIndex } from "../modify/UndoRedo";
 import { selectService } from "../service/message.service";
+import Save from './fn/Save';
 const Warp = styled(Box)({
     display: "inline-block", width: '100%', textAlign: 'left', padding: '10px', marginBottom: '17px', paddingRight: '20px', paddingLeft: '20px'
 });
@@ -47,7 +48,6 @@ function fnSort(a: any, b: any) {
     return a['ID'] - b['ID']
 }
 export default function LayerItem({ item }) {
-    console.log(item);
     const map = useContext(MapContext);
     const [showTable, setShowTable] = useState(false);
     const [visible, setVisible] = useState(item.getVisible());
@@ -136,8 +136,7 @@ export default function LayerItem({ item }) {
     const addObjectItem = (type) => {
         setAddAnchorEl(null);
         selectService.selectActive(false);
-
-        if (item.get("filePaths")[type] === null) {
+        if (item.get("filePaths")[type] === null || typeof item.get("filePaths")[type] === "undefined") {
             alertService.sendMessage("Error.", `선택하신 Layer Set 엔 ${type} 이(가) 존재하지 않습니다.`);
             return;
         }
@@ -159,42 +158,75 @@ export default function LayerItem({ item }) {
             dataSet.push(data);
         }
     }
+
+    // const save = (type) => {
+    //     console.log(type);
+    //     let keys = [];
+    //     if (type === "all") {
+    //         Object.keys(item.get("filePaths")).forEach((key) => {
+    //             if (item.get("filePaths")[key] === null) return;
+    //             else {
+    //                 keys.push(key);
+    //             }
+    //         })
+    //     } else if (type === "LAYER_LN_LINK" || type === "LAYER_LN_NODE") {
+    //         keys.push("LAYER_LN_LINK"); keys.push("LAYER_LN_NODE");
+    //     } else {
+    //         keys.push(type);
+    //     }
+    //     let obejcts = [];
+    //     keys.forEach((key) => {
+    //         let features = [];
+    //         item.getSource().getFeatures().forEach((feature) => {
+    //             pushData(feature, key, features);
+    //         });
+    //         features.sort(fnSort);
+    //         obejcts.push({ type: key, path: item.get("filePaths")[key], obejcts: features })
+    //     });
+    //     ipcRenderer.send("allFileSave", obejcts);
+    //     loadingService.sendMessage(true);
+    // }
     const saveObjectItem = (type) => {
+        /* 
+            벨리데이션 체크 해야함. 
+        */
         setSaveAnchorEl(null);
-        let obejcts = [];
-        item.getSource().getFeatures().forEach((feature) => {
-            pushData(feature, type, obejcts);
-        });
-        console.log(type);
-        obejcts.sort(fnSort);
-        ipcRenderer.send("fileSave", { type: type, path: item.get("filePaths")[type], obejcts: obejcts });
+        if (type === "LAYER_LN_LINK" || type === "LAYER_LN_NODE") {
+            confrimValueService.sendMessage("레이어 저장", "Link 또는 Node 오브젝트는 저장시 하나의 세트로 저장합니다.", Save, null, type, item);
+        } else {
+            confrimValueService.sendMessage("레이어 저장", `${type}을 저장하시겠습니까?`, Save, null, type, item);
+        }
+        // let obejcts = [];
+        // item.getSource().getFeatures().forEach((feature) => {
+        //     pushData(feature, type, obejcts);
+        // });
+        // obejcts.sort(fnSort);
+        // ipcRenderer.send("fileSave", { type: type, path: item.get("filePaths")[type], obejcts: obejcts });
+        // loadingService.sendMessage(true);
     }
     const saveAllObjectItem = () => {
         setSaveAnchorEl(null);
-        let obejcts = [];
-        Object.keys(item.get("filePaths")).forEach((key) => {
-            if (item.get("filePaths")[key] === null) return;
-            else {
-                let features = [];
-                item.getSource().getFeatures().forEach((feature) => {
-                    pushData(feature, key, features);
-                });
-                features.sort(fnSort);
-                obejcts.push({ type : key, path: item.get("filePaths")[key], obejcts : features})
-            }
-        });
-        // console.log(obejcts);
-
-        // let temp = item.getSource().getFeatures().filter((originFeature) => {
-        // return originFeature.get("group") === feature.get("group")
+        confrimValueService.sendMessage("레이어 저장", `모든 오브젝트를 저장하시겠습니까?`, Save, null, 'all', item);
+        
+        // let obejcts = [];
+        // Object.keys(item.get("filePaths")).forEach((key) => {
+        //     if (item.get("filePaths")[key] === null) return;
+        //     else {
+        //         let features = [];
+        //         item.getSource().getFeatures().forEach((feature) => {
+        //             pushData(feature, key, features);
+        //         });
+        //         features.sort(fnSort);
+        //         obejcts.push({ type: key, path: item.get("filePaths")[key], obejcts: features })
+        //     }
         // });
-
-        // { type : type, path: item.get("filePaths")[type], obejcts : obejcts}
-        ipcRenderer.send("allFileSave", obejcts);
+        // ipcRenderer.send("allFileSave", obejcts);
+        // loadingService.sendMessage(true);
     }
     useEffect(() => {
         let copySubscription;
-        if (item.get("title") !== "브이월드") {
+        if (item.get('hdSet')) {
+
             if (item.get("zIndex") === map.getLayers().getLength() - 2) {
                 copySubscription = featureCopyService.getMessage().subscribe(message => {
 
@@ -324,7 +356,7 @@ export default function LayerItem({ item }) {
                         />
                         <CustomSwitch checked={visible} onChange={visibleSwitch} />
                     </ListItem>
-                    {(item.get('title') !== '브이월드') &&
+                    {(item.get('hdSet')) &&
                         <ListItem disablePadding>
                             <ListItemIcon sx={{ minWidth: '40px' }}>
                                 <SvgIcon fontSize="small" sx={{ width: '18px' }}>
@@ -367,7 +399,7 @@ export default function LayerItem({ item }) {
 
                         />
                     </ListItem>
-                    {(item.get('title') !== '브이월드') &&
+                    {(item.get('hdSet')) &&
                         <ListItem disablePadding sx={{}}  >
                             <Box sx={{ textAlign: 'right', width: '100%' }}>
                                 <Tooltip title="위치로 이동">
@@ -388,7 +420,7 @@ export default function LayerItem({ item }) {
                                     </Tooltip>
                                     <Menu open={addMenuOpen} anchorEl={addAnchorEl} onClose={addMenuHandleClose}>
                                         {LayerNames.map((layerName) => {
-                                            if (item.get("filePaths")[layerName] !== null) return <MenuItem key={layerName} onClick={() => addObjectItem(layerName)}>{layerName}</MenuItem>
+                                            if (item.get("filePaths")[layerName] !== null && typeof item.get("filePaths")[layerName] !== "undefined") return <MenuItem key={layerName} onClick={() => addObjectItem(layerName)}>{layerName}</MenuItem>
                                         })}
                                     </Menu>
 
@@ -403,7 +435,10 @@ export default function LayerItem({ item }) {
                                     <Menu open={saveMenuOpen} anchorEl={saveAnchorEl} onClose={saveMenuHandleClose}>
                                         <MenuItem onClick={() => saveAllObjectItem()}>ALL Object</MenuItem>
                                         {LayerNames.map((layerName) => {
-                                            if (item.get("filePaths")[layerName] !== null) return <MenuItem key={layerName} onClick={() => saveObjectItem(layerName)}>{layerName}</MenuItem>
+
+                                            if (item.get("filePaths")[layerName] !== null && typeof item.get("filePaths")[layerName] !== "undefined") {
+                                                return <MenuItem key={layerName} onClick={() => saveObjectItem(layerName)}>{layerName}</MenuItem>
+                                            }
                                         })}
                                     </Menu>
                                 </>

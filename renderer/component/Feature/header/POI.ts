@@ -1,8 +1,8 @@
-import { idCheck, numberCheck } from "./FeatureHader";
+import { idCheck, numberCheck, pointXYCheck } from "./FeatureHader";
 
 export const LayerPOIHader = [
-    { field: "ID", valueSetter: idCheck, },
+    { field: "ID", valueParser: idCheck, },
     { field: "LinkID", valueParser :  numberCheck},
     { field: "Name"},
-    { field: "PointXY" ,editable: false,},
+    { field: "PointXY", editable: true, cellEditor: "agLargeTextCellEditor", cellEditorPopup: true , valueParser: pointXYCheck},
 ]

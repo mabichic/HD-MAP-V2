@@ -1,33 +1,33 @@
-import { extractValues, idCheck, lookupValue, numberCheck, valueToArry } from "./FeatureHader";
+import { extractValues, idCheck, lookupValue, numberCheck, pointXYCheck, valueToArry } from "./FeatureHader";
 
-const typeMappings = {
+export const roadlightTypeMappings = {
   0: "TYPE_NONE",
   1: "RL_HOR",
   2: "RL_VIR",
 };
-const subTypeMappings = {
+export const roadlightSubTypeMappings = {
   0: "TYPE_NONE",
   1: "RL_2",
   2: "RL_3",
   3: "RL_4",
   4: "RL_5",
 };
-const divMappings = {
+export const roadlightDivMappings = {
   0: "None",
   1: "GEN_RL",
   2: "BUS_RL",
   3: "FLASHING_RL",
 };
 
-const types = extractValues(typeMappings);
-const subTypes = extractValues(subTypeMappings);
-const divs = extractValues(divMappings);
+const types = extractValues(roadlightTypeMappings);
+const subTypes = extractValues(roadlightSubTypeMappings);
+const divs = extractValues(roadlightDivMappings);
 
 const stopLineIDCount = (params) => {
   return params.data.StopLineID.length;
 };
 export const LayerRoadlightHader = [
-  { field: "ID", valueSetter: idCheck, },
+  { field: "ID", valueParser: idCheck, },
   { field: "LaneID", valueParser :  numberCheck },
   {
     field: "Type",
@@ -37,11 +37,11 @@ export const LayerRoadlightHader = [
     },
     filterParams: {
       valueFormatter: function (params) {
-        return lookupValue(typeMappings, params.value);
+        return lookupValue(roadlightTypeMappings, params.value);
       },
     },
     valueFormatter: function (params) {
-      return lookupValue(typeMappings, params.value);
+      return lookupValue(roadlightTypeMappings, params.value);
     },
   },
   {
@@ -52,11 +52,11 @@ export const LayerRoadlightHader = [
     },
     filterParams: {
       valueFormatter: function (params) {
-        return lookupValue(subTypeMappings, params.value);
+        return lookupValue(roadlightSubTypeMappings, params.value);
       },
     },
     valueFormatter: function (params) {
-      return lookupValue(subTypeMappings, params.value);
+      return lookupValue(roadlightSubTypeMappings, params.value);
     },
   },
   {
@@ -67,23 +67,20 @@ export const LayerRoadlightHader = [
     },
     filterParams: {
       valueFormatter: function (params) {
-        return lookupValue(divMappings, params.value);
+        return lookupValue(roadlightDivMappings, params.value);
       },
     },
     valueFormatter: function (params) {
-      return lookupValue(divMappings, params.value);
+      return lookupValue(roadlightDivMappings, params.value);
     },
   },
   { field: "NumStopLine", editable: false, valueGetter: stopLineIDCount },
   {
     field: "StopLineID",
-    // valueFormatter: function (params) {
-    //   console.log(params.value);
-    //   return valueToArry(params.value);
-    // },
+  
     valueParser: valueToArry,
 
   },
   { field: "NumPoint", editable: false },
-  { field: "PointXY", editable: false },
+  { field: "PointXY", editable: true, cellEditor: "agLargeTextCellEditor", cellEditorPopup: true , valueParser: pointXYCheck},
 ];

@@ -1,6 +1,6 @@
-import { extractValues, idCheck, linkIdCheck, lookupValue, numberCheck } from "./FeatureHader";
+import { extractValues, idCheck, linkIdCheck, lookupValue, numberCheck, pointXYCheck } from "./FeatureHader";
 
-const typeMappings = {
+export const linkTypeMappings = {
   0: "TYPE_NONE",
   1: "GEN_S",
   2: "JUN_S",
@@ -13,24 +13,24 @@ const typeMappings = {
   9: "JUN_UNPROTECTED_L",
   10: "JUN_UNPROTECTED_R",
 };
-const subTypeMappings = {
+export const linkSubTypeMappings = {
   0: "TYPE_NONE",
   1: "GEN",
   2: "BUS_ONLY",
   3: "HIGHPASS",
   4: "TURNAL",
 };
-const twowayMappings = {
+export const linkTwowayMappings = {
   0: "일방",
   1: "양방향",
 };
 
-const linkTypes = extractValues(typeMappings);
-const linkSubTypes = extractValues(subTypeMappings);
-const linkTwowayTypes = extractValues(twowayMappings);
+const linkTypes = extractValues(linkTypeMappings);
+const linkSubTypes = extractValues(linkSubTypeMappings);
+const linkTwowayTypes = extractValues(linkTwowayMappings);
 
 export const LayerLnLinkHader = [
-  { field: "ID", valueSetter: idCheck,},
+  { field: "ID", valueParser: idCheck,},
   { field: "MID", valueParser :  numberCheck },
   { field: "LID", valueParser :  numberCheck },
   { field: "RID", valueParser :  numberCheck },
@@ -43,32 +43,32 @@ export const LayerLnLinkHader = [
   { field: "Junction", valueParser :  numberCheck },
   {
     field: "Type",
-    cellEditor: "agSelectCellEditor",
+    cellEditor: "agSelectCellEditor", 
     cellEditorParams: {
       values: linkTypes,
     },
     filterParams: {
       valueFormatter: function (params) {
-        return lookupValue(typeMappings, params.value);
+        return lookupValue(linkTypeMappings, params.value);
       },
     },
     valueFormatter: function (params) {
-      return lookupValue(typeMappings, params.value);
+      return lookupValue(linkTypeMappings, params.value);
     },
   },
   {
-    field: "Sub_Type",
+    field: "SubType",
     cellEditor: "agSelectCellEditor",
     cellEditorParams: {
       values: linkSubTypes,
     },
     filterParams: {
       valueFormatter: function (params) {
-        return lookupValue(subTypeMappings, params.value);
+        return lookupValue(linkSubTypeMappings, params.value);
       },
     },
     valueFormatter: function (params) {
-      return lookupValue(subTypeMappings, params.value);
+      return lookupValue(linkSubTypeMappings, params.value);
     },
   },
   {
@@ -79,11 +79,11 @@ export const LayerLnLinkHader = [
     },
     filterParams: {
       valueFormatter: function (params) {
-        return lookupValue(twowayMappings, params.value);
+        return lookupValue(linkTwowayMappings, params.value);
       },
     },
     valueFormatter: function (params) {
-      return lookupValue(twowayMappings, params.value);
+      return lookupValue(linkTwowayMappings, params.value);
     },
   },
   { field: "RLID", valueParser :  numberCheck },
@@ -93,5 +93,5 @@ export const LayerLnLinkHader = [
   { field: "ENodeID" ,editable: false,},
   { field: "Speed", valueParser :  numberCheck },
   { field: "NumPoint" ,editable: false,},
-  { field: "PointXY" ,editable: false,},
+  { field: "PointXY", editable: true, cellEditor: "agLargeTextCellEditor", cellEditorPopup: true , valueParser: pointXYCheck},
 ];
