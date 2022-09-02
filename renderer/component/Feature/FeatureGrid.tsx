@@ -5,7 +5,7 @@ import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "r
 import MapContext from "../context/MapContext";
 import DeleteFeature from "../modify/Delete";
 import { getUnDoReDoIndex, setUpUnDoReDoIndex, UndoPush } from "../modify/UndoRedo";
-import { alertService, featureService, loadingService } from "../service/message.service";
+import { alertService, confrimValueService, featureService, loadingService } from "../service/message.service";
 import FeatureEditor from "./FeatureEditor";
 import LinkID from "./service/LinkID";
 import SafePointLinkID from "./service/SafePointLinkID";
@@ -20,7 +20,7 @@ interface FeatureGridProps {
     visible: boolean;
 }
 
-const exclusionFieldList = ['ID', 'PointXY', 'NumPoint', 'LID', 'RID', 'InMID', 'InLID', 'InRID', 'outMID', 'outLID', 'outRID', 'RLID', 'LLinkID', 'RLinkID', 'SNodeID', 'ENodeID', 'NumConLink', 'LinkID', 'NumStopLine'];
+const exclusionFieldList = ['ID', 'PointXY', 'NumPoint', 'LID', 'RID', 'InMID', 'InLID', 'InRID', 'outMID', 'outLID', 'outRID', 'RLID', 'LLinkID', 'RLinkID', 'SNodeID', 'ENodeID', 'NumConLink', 'LinkID', 'NumStopLine', 'StopLineID','InterLinkID','QueryLinkID'];
 
 export default function FeatureGrid({
     feature,
@@ -90,8 +90,8 @@ export default function FeatureGrid({
         let filteredFeatures = source.getFeatures().filter(fea => {
             return feautes.includes(fea.getId());
         });
+        confrimValueService.sendMessage("객체 제거", feautes.length + " 개의 객체를 정말 제거 하시겠습니까?", DeleteFeature, null, filteredFeatures, null);
 
-        DeleteFeature(filteredFeatures);
     }, [gridApi]);
 
     useEffect(() => {
@@ -168,7 +168,6 @@ export default function FeatureGrid({
         let feature = source.getFeatureById(e.data.featureID);
         let prevFeature = feature.clone();
         let data = { field: e.colDef.field, data: e.newValue };
-        console.log(e);
         if (e.colDef.field === "StopLineID") {
             data = { field: e.colDef.field, data: e.newValue };
             feature.set("NumStopLine", data.data.length);

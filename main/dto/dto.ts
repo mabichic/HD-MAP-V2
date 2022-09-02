@@ -139,7 +139,13 @@ export class LAYER_LANESIDE_CONV implements LAYER_LANESIDE_PROPERTIE {
     this.Type = Number(data.Type);
     this.Color = Number(data.Color);
     this.NumPoint = Number(data.NumPoint);
-    this.PointXY = data.PointXY.join(" ").replaceAll(",", " ");
+    const xy = data.PointXY.map((x) =>
+      x.map((y) => {
+        const z = Math.floor(y * 1000000).toFixed(0);
+        return (Number(z) / 1000000).toFixed(6);
+      })
+    );
+    this.PointXY = xy.join(" ").replaceAll(",", " ");
   }
   conv = () => this.ID + " " + this.MID + " " + this.LaneID + " " + this.Type + " " + this.Color + " " + this.NumPoint + " " + this.PointXY + " " + "\r\n";
 }
@@ -232,7 +238,7 @@ export class LAYER_LN_LINK_CONV implements LAYER_LN_LINK_PROPERTIE {
     this.outRID = Number(data.outRID);
     this.Junction = Number(data.Junction);
     this.Type = Number(data.Type);
-    this.SubType = Number(data.Sub_Type);
+    this.SubType = Number(data.SubType);
     this.Twoway = Number(data.Twoway);
     this.RLID = Number(data.RLID);
     this.LLinkID = Number(data.LLinkID);
@@ -241,7 +247,13 @@ export class LAYER_LN_LINK_CONV implements LAYER_LN_LINK_PROPERTIE {
     this.ENodeID = Number(data.ENodeID);
     this.Speed = Number(data.Speed);
     this.NumPoint = Number(data.NumPoint);
-    this.PointXY = data.PointXY.join(" ").replaceAll(",", " ");
+    const xy = data.PointXY.map((x) =>
+      x.map((y) => {
+        const z = Math.floor(y * 1000000).toFixed(0);
+        return (Number(z) / 1000000).toFixed(6);
+      })
+    );
+    this.PointXY = xy.join(" ").replaceAll(",", " ");
   }
   conv = () =>
     this.ID +
@@ -325,7 +337,11 @@ export class LAYER_LN_NODE_CONV implements LAYER_LN_NODE_PROPERTIE {
     this.ID = Number(data.ID);
     this.NumConLink = Number(data.NumConLink);
     this.LinkID = data.LinkID.join(" ");
-    this.PointXY = data.PointXY.join(" ").replaceAll(",", " ");
+    const xy = data.PointXY.map((y) => {
+      const z = Math.floor(y * 1000000).toFixed(0);
+      return (Number(z) / 1000000).toFixed(6);
+    });
+    this.PointXY = xy.join(" ").replaceAll(",", " ");
   }
   conv = () => this.ID + " " + this.NumConLink + " " + this.LinkID + " " + this.PointXY + " " + "\r\n";
 }
@@ -416,7 +432,13 @@ export class LAYER_ROADLIGHT_CONV implements LAYER_ROADLIGHT_PROPERTIE {
     this.NumStopLine = Number(data.NumStopLine);
     this.StopLineID = data.StopLineID.join(" ");
     this.NumPoint = Number(data.NumPoint);
-    this.PointXY = data.PointXY.join(" ").replaceAll(",", " ");
+    const xy = data.PointXY.map((x) =>
+      x.map((y) => {
+        const z = Math.floor(y * 1000000).toFixed(0);
+        return (Number(z) / 1000000).toFixed(6);
+      })
+    );
+    this.PointXY = xy.join(" ").replaceAll(",", " ");
   }
   conv = () => {
     let result = "";
@@ -455,6 +477,7 @@ export class LAYER_ROADMARK implements LAYER_ROADMARK_PROPERTIE {
     this.NumStopLine = Number(numStopline);
     this.StopLineID = stoplineID.map(Number);
     this.NumPoint = Number(array.split(" ")[4 + numStopline]);
+    
     this.PointXY = [
       division(
         array
@@ -484,7 +507,15 @@ export class LAYER_ROADMARK_CONV implements LAYER_ROADMARK_PROPERTIE {
     this.NumStopLine = Number(data.NumStopLine);
     this.StopLineID = data.StopLineID.join(" ");
     this.NumPoint = Number(data.NumPoint);
-    this.PointXY = data.PointXY.join(" ").replaceAll(",", " ");
+    const xy = data.PointXY.map((x) =>
+      x.map((y) => 
+        y.map((z) =>{
+          const g = Math.floor(z * 1000000).toFixed(0);
+          return (Number(g) / 1000000).toFixed(6);
+        })
+      )
+    );
+    this.PointXY = xy.join(" ").replaceAll(",", " ");
   }
   conv = () => {
     let result = "";
@@ -530,7 +561,11 @@ export class LAYER_SAFEPOINT_CONV implements LAYER_SAFEPOINT_PROPERTIE {
     this.QueryLinkID = Number(data.QueryLinkID);
     this.InterLinkID = Number(data.InterLinkID);
     this.length = Number(data.length);
-    this.PointXY = data.PointXY.join(" ").replaceAll(",", " ");
+    const xy = data.PointXY.map((y) => {
+      const z = Math.floor(y * 1000000).toFixed(0);
+      return (Number(z) / 1000000).toFixed(6);
+    });
+    this.PointXY = xy.join(" ").replaceAll(",", " ");
   }
   conv = () => {
     let result = "";

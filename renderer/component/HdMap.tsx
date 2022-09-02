@@ -28,7 +28,7 @@ import DeleteFeature from './modify/Delete';
 import { MeasureCancle, MeasureClear, MeasureInit, MeasureStart } from './modify/Measure';
 import ModifyEnd from './modify/ModifyEnd';
 import { setModifyStartUndo, setRedo, setUndo } from './modify/UndoRedo';
-import { alertService, featureCopyService, featureService, selectService } from './service/message.service';
+import { alertService, confrimService, featureCopyService, featureService, loadingService, selectService } from './service/message.service';
 const Store = require('electron-store');
 
 const store = new Store();
@@ -159,23 +159,23 @@ function HdMap({ children, zoom, center }) {
                 Object.keys(feature.getProperties()).forEach((key) => {
                     if (key === 'geometry' || key === 'PointXY' || key === 'source' || key === 'Index') return;
                     txt[key] = feature.get(key);
-                    if(feature.get("group")==="LAYER_LANESIDE"){ 
-                        if(key==="Type")    txt[key] = lanesideTypeMappings[feature.get(key)];
-                        if(key==="Color")   txt[key] = colourMappings[feature.get(key)];
+                    if (feature.get("group") === "LAYER_LANESIDE") {
+                        if (key === "Type") txt[key] = lanesideTypeMappings[feature.get(key)];
+                        if (key === "Color") txt[key] = colourMappings[feature.get(key)];
                     }
-                    if(feature.get("group")==="LAYER_LN_LINK"){ 
-                        if(key==="Type")    txt[key] = linkTypeMappings[feature.get(key)];
-                        if(key==="SubType")   txt[key] = linkSubTypeMappings[feature.get(key)];
-                        if(key==="Twoway")   txt[key] = linkTwowayMappings[feature.get(key)];
+                    if (feature.get("group") === "LAYER_LN_LINK") {
+                        if (key === "Type") txt[key] = linkTypeMappings[feature.get(key)];
+                        if (key === "SubType") txt[key] = linkSubTypeMappings[feature.get(key)];
+                        if (key === "Twoway") txt[key] = linkTwowayMappings[feature.get(key)];
                     }
-                    if(feature.get("group")==="LAYER_ROADLIGHT"){ 
-                        if(key==="Type")    txt[key] = roadlightTypeMappings[feature.get(key)];
-                        if(key==="SubType")   txt[key] = roadlightSubTypeMappings[feature.get(key)];
-                        if(key==="Div")   txt[key] = roadlightDivMappings[feature.get(key)];
+                    if (feature.get("group") === "LAYER_ROADLIGHT") {
+                        if (key === "Type") txt[key] = roadlightTypeMappings[feature.get(key)];
+                        if (key === "SubType") txt[key] = roadlightSubTypeMappings[feature.get(key)];
+                        if (key === "Div") txt[key] = roadlightDivMappings[feature.get(key)];
                     }
-                    if(feature.get("group")==="LAYER_ROADMARK"){ 
-                        if(key==="Type")    txt[key] = roadmarkTypeMappings[feature.get(key)];
-                        if(key==="SubType")   txt[key] = roadmarkSubTypeMappings[feature.get(key)];
+                    if (feature.get("group") === "LAYER_ROADMARK") {
+                        if (key === "Type") txt[key] = roadmarkTypeMappings[feature.get(key)];
+                        if (key === "SubType") txt[key] = roadmarkSubTypeMappings[feature.get(key)];
                     }
                 });
                 setContent(() => (txt));
@@ -214,7 +214,6 @@ function HdMap({ children, zoom, center }) {
                 featureService.stopLineIdSelected("stopIDSSelected", stopIDS, select);
             }
             if (linkIDS.length > 0) {
-                console.log(linkIDS);
                 featureService.linkIdSelected("linkIDSSelected", linkIDS, select);
             }
             if (select.getFeatures().getLength() > 0) featureService.selected("selected", features);
@@ -224,7 +223,7 @@ function HdMap({ children, zoom, center }) {
         });
         const modify = new Modify({
             deleteCondition: (e) => {
-                if(!modifyKeyDown)  return;
+                if (!modifyKeyDown) return;
                 return click(e) && modifyKeyDown;
             },
             features: select.getFeatures(),
@@ -262,11 +261,11 @@ function HdMap({ children, zoom, center }) {
         mapObject.setTarget(mapRef.current);
         setMap(mapObject);
         document.addEventListener('keydown', function (evt) {
-            if (modifyKeyDown&&evt.key !== 'd') return;
+            if (modifyKeyDown && evt.key !== 'd') return;
             modifyKeyDown = (evt.key === 'd');
         });
         document.addEventListener('keyup', function (evt) {
-            if(evt.key !== 'd') return; 
+            if (evt.key !== 'd') return;
             modifyKeyDown = (evt.key !== 'd');
         });
         return () => {
@@ -343,12 +342,21 @@ function HdMap({ children, zoom, center }) {
         });
         ipcRenderer.on("undo", (event, args) => {
             select.getFeatures().clear();
-            setUndo();
+            const undoFn = () => {
+                loadingService.sendMessage(true);
+                setTimeout(() => {
+                    setUndo();
+                }, 0);
+            }
+            confrimService.sendMessage("실행취소", "속성테이블을 연 상태로 실행취소 수행 시 속도가 저하됩니다. 실행취소를 수행하시겠습니까?", undoFn, null);
             dellOverlay();
         });
         ipcRenderer.on("redo", (event, args) => {
             select.getFeatures().clear();
-            setRedo();
+            loadingService.sendMessage(true);
+            setTimeout(() => {
+                setRedo();
+            }, 0);
             dellOverlay();
         });
         return () => {
@@ -366,7 +374,7 @@ function HdMap({ children, zoom, center }) {
                 {children}
             </div>
 
-            <Box className={styles.windowHDMapOverlay} ref={overlayRef} component={'div'} sx={{ padding: '0px' }}>
+            <Box className={styles.windowHDMapOverlay} ref={overlayRef} component={'div'} sx={{ padding: '15px' }}>
                 <IconButton onClick={dellOverlay} sx={{ backgroundColor: '#E5E5E5', position: 'absolute', right: '10px', top: '7px', width: '26px', height: '26px', borderRadius: '0' }} >
                     <CloseIcon fontSize="small" sx={{ fill: '##4A4C55' }} />
                 </IconButton>

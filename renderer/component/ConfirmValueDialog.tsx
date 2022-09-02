@@ -67,7 +67,11 @@ export default function ConfirmValueDialog() {
       handleClose();
       return;
     }
-    onConfirm?.onConfirm(onConfirm?.value, onConfirm?.item);
+    if (onConfirm?.item === null) {
+      onConfirm?.onConfirm(onConfirm?.value);
+    } else {
+      onConfirm?.onConfirm(onConfirm?.value, onConfirm?.item);
+    }
     handleClose();
   };
   const confirmNo = () => {

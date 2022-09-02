@@ -159,33 +159,7 @@ export default function LayerItem({ item }) {
         }
     }
 
-    // const save = (type) => {
-    //     console.log(type);
-    //     let keys = [];
-    //     if (type === "all") {
-    //         Object.keys(item.get("filePaths")).forEach((key) => {
-    //             if (item.get("filePaths")[key] === null) return;
-    //             else {
-    //                 keys.push(key);
-    //             }
-    //         })
-    //     } else if (type === "LAYER_LN_LINK" || type === "LAYER_LN_NODE") {
-    //         keys.push("LAYER_LN_LINK"); keys.push("LAYER_LN_NODE");
-    //     } else {
-    //         keys.push(type);
-    //     }
-    //     let obejcts = [];
-    //     keys.forEach((key) => {
-    //         let features = [];
-    //         item.getSource().getFeatures().forEach((feature) => {
-    //             pushData(feature, key, features);
-    //         });
-    //         features.sort(fnSort);
-    //         obejcts.push({ type: key, path: item.get("filePaths")[key], obejcts: features })
-    //     });
-    //     ipcRenderer.send("allFileSave", obejcts);
-    //     loadingService.sendMessage(true);
-    // }
+
     const saveObjectItem = (type) => {
         /* 
             벨리데이션 체크 해야함. 
@@ -196,32 +170,13 @@ export default function LayerItem({ item }) {
         } else {
             confrimValueService.sendMessage("레이어 저장", `${type}을 저장하시겠습니까?`, Save, null, type, item);
         }
-        // let obejcts = [];
-        // item.getSource().getFeatures().forEach((feature) => {
-        //     pushData(feature, type, obejcts);
-        // });
-        // obejcts.sort(fnSort);
-        // ipcRenderer.send("fileSave", { type: type, path: item.get("filePaths")[type], obejcts: obejcts });
-        // loadingService.sendMessage(true);
+
     }
     const saveAllObjectItem = () => {
         setSaveAnchorEl(null);
         confrimValueService.sendMessage("레이어 저장", `모든 오브젝트를 저장하시겠습니까?`, Save, null, 'all', item);
-        
-        // let obejcts = [];
-        // Object.keys(item.get("filePaths")).forEach((key) => {
-        //     if (item.get("filePaths")[key] === null) return;
-        //     else {
-        //         let features = [];
-        //         item.getSource().getFeatures().forEach((feature) => {
-        //             pushData(feature, key, features);
-        //         });
-        //         features.sort(fnSort);
-        //         obejcts.push({ type: key, path: item.get("filePaths")[key], obejcts: features })
-        //     }
-        // });
-        // ipcRenderer.send("allFileSave", obejcts);
-        // loadingService.sendMessage(true);
+
+
     }
     useEffect(() => {
         let copySubscription;
@@ -318,13 +273,18 @@ export default function LayerItem({ item }) {
                 ipcRenderer.on("addObject", (event, args) => {
                     addObjectItem(args);
                 });
+                ipcRenderer.on("saveAll", (event, args) => {
+                    saveAllObjectItem();
+                });
             }
         }
         return () => {
             copySubscription?.unsubscribe();
             ipcRenderer.removeAllListeners("addObject");
+            ipcRenderer.removeAllListeners("save");
         }
     }, [item])
+
     return (
         <>
             <Warp>
@@ -399,6 +359,17 @@ export default function LayerItem({ item }) {
 
                         />
                     </ListItem>
+                    {(!item.get("hdSet") && item.get("title") !== '브이월드') &&
+                        <ListItem disablePadding sx={{}}  >
+                            <Box sx={{ textAlign: 'right', width: '100%' }}>
+                                <Tooltip title="레이어 셋 제거">
+                                    <IconButton sx={{ minWidth: '40px' }} onClick={layerDelete}>
+                                        <DeleteForeverIcon sx={{ fontSize: '25px', color: "#F10062" }} />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
+                        </ListItem>
+                    }
                     {(item.get('hdSet')) &&
                         <ListItem disablePadding sx={{}}  >
                             <Box sx={{ textAlign: 'right', width: '100%' }}>

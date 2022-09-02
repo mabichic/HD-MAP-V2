@@ -6,6 +6,7 @@ import { Redo, Undo } from "./menu/edit/UndoReDo";
 import GpsFileLoad from "./menu/file/GpsFileLoad";
 import LoadAll from "./menu/file/LoadAll";
 import LoadFile from "./menu/file/LoadFile";
+import SaveAll from "./menu/file/SaveAll";
 export function HDMapMenu(mainWindow: BrowserWindow, store: any): (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] {
   const menu: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = [
     // (Electron.MenuItemConstructorOptions | Electron.MenuItem)[])
@@ -31,7 +32,9 @@ export function HDMapMenu(mainWindow: BrowserWindow, store: any): (Electron.Menu
         { type: "separator" },
         {
           label: "Save All",
-          click: () => {},
+          click: () => {
+            SaveAll(mainWindow, store);
+          },
           accelerator: "ctrl+s",
         },
       ],

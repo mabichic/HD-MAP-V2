@@ -3,8 +3,9 @@ import { featureService } from "../service/message.service";
 import { getUnDoReDoIndex, setInitRedo, setUpUnDoReDoIndex, UndoPush } from "./UndoRedo";
 
 export default function DeleteFeature(features: Array<Feature>) {
+
   features.forEach((feature) => {
-    feature.get("source").removeFeature(feature);
+    
     let ID = feature.get("ID");
     if (feature.get("group") === "LAYER_LN_LINK") {
       let sNodeId = feature.get("SNodeID");
@@ -42,6 +43,9 @@ export default function DeleteFeature(features: Array<Feature>) {
         UndoPush("UPDATE", link.get("source"), link, preFeature, nextFeature, getUnDoReDoIndex());
       });
     }
+  });
+  features.forEach((feature) => {
+    feature.get("source").removeFeature(feature);
     UndoPush("DELETE", feature.get("source"), feature, null, null, getUnDoReDoIndex());
   });
   featureService.selected("featureChange", null);

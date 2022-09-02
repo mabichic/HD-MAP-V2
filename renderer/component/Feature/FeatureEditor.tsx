@@ -4,8 +4,11 @@ import CloseIcon from '@mui/icons-material/Close';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { useCallback, useState } from "react";
 import { getUnDoReDoIndex, setUpUnDoReDoIndex, UndoPush } from "../modify/UndoRedo";
-import { featureService } from "../service/message.service";
+import { alertService, featureService } from "../service/message.service";
 import { colourMappings, lanesideTypeMappings } from "./header/Laneside";
+import { linkSubTypeMappings, linkTwowayMappings, linkTypeMappings } from "./header/Link";
+import { roadlightDivMappings, roadlightSubTypeMappings, roadlightTypeMappings } from "./header/Roadlight";
+import { roadmarkSubTypeMappings, roadmarkTypeMappings } from "./header/RoadMark";
 const style = {
     position: 'absolute' as 'absolute',
     top: '50%',
@@ -24,10 +27,19 @@ function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
     const [field, setField] = useState(fields[0].colId)
     const ValueField = () => {  
         let menu;
-        if (field === "Type" || field === "Color") {
+        
+        if (field === "Type" || field === "Color" || field==="SubType"|| field==="Twoway" || field==="Div") {
             if (type==='layerLaneside'&& field === "Type") menu = lanesideTypeMappings;
             else if (field === "Color") menu = colourMappings;
-            
+            else if (type==='layerLnLink'&& field === "Type") menu = linkTypeMappings;
+            else if (type==='layerLnLink'&& field === "SubType") menu = linkSubTypeMappings;
+            else if (type==='layerLnLink'&& field === "Twoway") menu = linkTwowayMappings;
+            else if (type==='layerRoadlight'&& field === "Type") menu = roadlightTypeMappings;
+            else if (type==='layerRoadlight'&& field === "SubType") menu = roadlightSubTypeMappings;
+            else if (type==='layerRoadlight'&& field === "Div") menu = roadlightDivMappings;
+            else if (type==='layerRoadmark'&& field === "Type") menu = roadmarkTypeMappings;
+            else if (type==='layerRoadmark'&& field === "SubType") menu = roadmarkSubTypeMappings;
+            // else if(field====)?
             const menuRendering = () => {
                 const result = [];
                 for (let key in menu) {
@@ -39,8 +51,8 @@ function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
                 <Select
                     size="small"
                     sx={{ width: '133px', marginLeft: '20px' }}
-                    value={1}
-                    // onChange={fieldChange}
+                    value={value}
+                    onChange={(e)=>setValue(e.target.value)}
                     displayEmpty
                     inputProps={{ 'aria-label': 'Without label' }}
                 >
@@ -54,6 +66,12 @@ function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
         }
     }
     const valueChange = useCallback((e) => {
+        if(field!=="Name"){ 
+            if (isNaN(Number(value))) {
+                alertService.sendMessage("Error.", "숫자만 입력 할 수 있습니다.");
+                return;
+            }
+        }
         gridRef.current.api.getSelectedNodes().forEach((node) => {
             let feature = source.getFeatureById(node.data.featureID);
             let prevFeature = feature.clone();
@@ -68,7 +86,13 @@ function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
 
     }, [value, gridRef, source]);
     const fieldChange = useCallback((e) => {
+
         setField(e.target.value);
+        if (e.target.value === "Type" || e.target.value === "Color" || e.target.value === "SubType" || e.target.value === "Twoway" || e.target.value === "Div") {
+            setValue("1");
+        }else{
+            setValue("");
+        }
     }, [value, field, gridRef, source])
     return (
         <Modal
@@ -118,7 +142,7 @@ function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
                 <Typography id="modal-modal-title" variant="subtitle1" sx={{ marginLeft: '20px', marginTop: '11px' }}>
                     Value
                 </Typography>
-                {(field === "Type" || field === "Color") ?
+                {(field === "Type" || field === "Color" || field==="SubType" || field==="Twoway" || field==="Div" ) ?
                     <ValueField />
                     :
                     <TextField id="standard-basic" variant="outlined" sx={{ marginLeft: '20px', width: '294px', marginBottom: '17px' }} size="small" value={value} onChange={(e) => setValue(e.target.value)} />

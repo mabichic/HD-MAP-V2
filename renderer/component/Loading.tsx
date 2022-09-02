@@ -1,7 +1,7 @@
-import * as React from 'react';
-import Dialog from '@mui/material/Dialog';
 import { CircularProgress } from '@mui/material';
+import Dialog from '@mui/material/Dialog';
 import { Box } from '@mui/system';
+import * as React from 'react';
 import { loadingService } from './service/message.service';
 
 export default function Loading() {
@@ -14,7 +14,6 @@ export default function Loading() {
       subscription.unsubscribe();
     }
   });
-
   return (
     <div>
       <Dialog open={loading}>

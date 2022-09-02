@@ -1,6 +1,6 @@
 import { Collection, Feature } from "ol";
 import VectorSource from "ol/source/Vector";
-import { featureService } from "../service/message.service";
+import { featureService, loadingService } from "../service/message.service";
 export const DRAW = "DRAW";
 export const MODIFY = "MODIFY";
 export const DELETE = "DELETE";
@@ -25,59 +25,68 @@ export interface UndoRedoType {
   nextFeautre: Feature | null;
   index: number | null;
 }
-export const undoDatas: Array<UndoRedoType | null> = [];
-export const redoDatas: Array<UndoRedoType | null> = [];
+export let undoDatas: Array<UndoRedoType | null> = [];
+export let redoDatas: Array<UndoRedoType | null> = [];
 export const setUndo = () => {
-
-  let length = undoDatas.length;
   let tempIndex = getUnDoReDoIndex() - 1;
+  let datas = undoDatas.filter((item, idex) => {
+    return item.index === tempIndex;
+  });
+  if(datas.length<1){ 
+    loadingService.sendMessage(false);
+    return;
+  }
+  undoDatas = undoDatas.filter((item, idex) => {
+    return item.index !== tempIndex;
+  });
+  setDownUnDoReDoIndex();
 
-  for (let i = 0; i < length; i++) {
-    if (tempIndex !== undoDatas[undoDatas.length - 1].index) {
-      setDownUnDoReDoIndex();
-      featureService.selected("featureChange", null);
-      break;
-    } else {
-      let data = undoDatas.pop();
-      redoDatas.push(data);
-      if (data.type === "DRAW") {
-        data.source.removeFeature(data.feature);
-      } else if (data.type === "UPDATE") {
-        data.feature.setProperties(data.prevFeature.getProperties(), false);
-      } else if (data.type === "MODIFY") {
-        data.feature.setProperties(data.prevFeature.getProperties(), false);
-        data.feature.setGeometry(data.prevFeature.getGeometry());
-      } else if (data.type === "DELETE") {
-        data.feature.get("source").addFeature(data.feature);
-      }
+  datas.reverse();
+  for (const data of datas) {
+    redoDatas.push(data);
+    if (data.type === "DRAW") {
+      data.source.removeFeature(data.feature);
+    } else if (data.type === "UPDATE") {
+      data.feature.setProperties(data.prevFeature.getProperties(), false);
+    } else if (data.type === "MODIFY") {
+      data.feature.setProperties(data.prevFeature.getProperties(), false);
+      data.feature.setGeometry(data.prevFeature.getGeometry());
+    } else if (data.type === "DELETE") {
+      data.feature.get("source").addFeature(data.feature);
     }
   }
+  loadingService.sendMessage(false);
   featureService.selected("featureChange", null);
 };
 export const setRedo = () => {
-  let tempIndex = getUnDoReDoIndex() - 1;
-  let length = redoDatas.length;
-  for (let i = 0; i < length; i++) {
-    if (tempIndex !== redoDatas[redoDatas.length - 1].index) {
-      setUpUnDoReDoIndex();
-      featureService.selected("featureChange", null);
-      break;
-    } else {
-      let data = redoDatas.pop();
-      undoDatas.push(data);
-      tempIndex = data.index;
-      if (data.type === "DRAW") {
-        data.source.addFeature(data.feature);
-      } else if (data.type === "UPDATE") {
-        data.feature.setProperties(data.nextFeautre.getProperties(), false);
-      } else if (data.type === "MODIFY") {
-        data.feature.setProperties(data.nextFeautre.getProperties(), false);
-        data.feature.setGeometry(data.nextFeautre.getGeometry());
-      } else if (data.type === "DELETE") {
-        data.source.removeFeature(data.feature);
-      }
+  let tempIndex = getUnDoReDoIndex();
+
+  let datas = redoDatas.filter((item, idex) => {
+    return item.index === tempIndex;
+  });
+  if(datas.length<1){ 
+    loadingService.sendMessage(false);
+    return;
+  }
+  redoDatas = redoDatas.filter((item, idex) => {
+    return item.index !== tempIndex;
+  });
+
+  setUpUnDoReDoIndex();
+  for (const data of datas) {
+    undoDatas.push(data);
+    if (data.type === "DRAW") {
+      data.source.addFeature(data.feature);
+    } else if (data.type === "UPDATE") {
+      data.feature.setProperties(data.nextFeautre.getProperties(), false);
+    } else if (data.type === "MODIFY") {
+      data.feature.setProperties(data.nextFeautre.getProperties(), false);
+      data.feature.setGeometry(data.nextFeautre.getGeometry());
+    } else if (data.type === "DELETE") {
+      data.source.removeFeature(data.feature);
     }
   }
+  loadingService.sendMessage(false);
   featureService.selected("featureChange", null);
 };
 
