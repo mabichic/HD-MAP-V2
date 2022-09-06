@@ -9,6 +9,7 @@ import { colourMappings, lanesideTypeMappings } from "./header/Laneside";
 import { linkSubTypeMappings, linkTwowayMappings, linkTypeMappings } from "./header/Link";
 import { roadlightDivMappings, roadlightSubTypeMappings, roadlightTypeMappings } from "./header/Roadlight";
 import { roadmarkSubTypeMappings, roadmarkTypeMappings } from "./header/RoadMark";
+import { safePointTypeMappings } from "./header/Safepoint";
 const style = {
     position: 'absolute' as 'absolute',
     top: '50%',
@@ -39,6 +40,7 @@ function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
             else if (type==='layerRoadlight'&& field === "Div") menu = roadlightDivMappings;
             else if (type==='layerRoadmark'&& field === "Type") menu = roadmarkTypeMappings;
             else if (type==='layerRoadmark'&& field === "SubType") menu = roadmarkSubTypeMappings;
+            else if (type==='layerSafepoint'&& field === "Type") menu = safePointTypeMappings;
             // else if(field====)?
             const menuRendering = () => {
                 const result = [];

@@ -7,7 +7,10 @@ import GpsFileLoad from "./menu/file/GpsFileLoad";
 import LoadAll from "./menu/file/LoadAll";
 import LoadFile from "./menu/file/LoadFile";
 import SaveAll from "./menu/file/SaveAll";
-export function HDMapMenu(mainWindow: BrowserWindow, store: any): (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] {
+export function HDMapMenu(
+  mainWindow: BrowserWindow,
+  store: any
+): (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] {
   const menu: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[] = [
     // (Electron.MenuItemConstructorOptions | Electron.MenuItem)[])
     {
@@ -148,6 +151,29 @@ export function HDMapMenu(mainWindow: BrowserWindow, store: any): (Electron.Menu
             AddObject(mainWindow, store, "LAYER_SAFEPOINT");
           },
           accelerator: "ctrl+7",
+        },
+      ],
+    },
+    {
+      label: "Help",
+      submenu: [
+        {
+          label: "Feature Select[Layer Edite On -> Feature Click]",
+        },
+        {
+          label: "Feature Multi Select[Ctrl + Drag]",
+        },
+        {
+          label: "Feature Move[Feature Select -> Ctr + Drag]",
+        },
+        {
+          label: "Feature Attributes View[Feature Right Click]",
+        },
+        {
+          label: "Feature Attributes Viewer Delete[Map Right Click]",
+        },
+        {
+          label: "Feature Point Delete[Feature Select -> D + Click]",
         },
       ],
     },

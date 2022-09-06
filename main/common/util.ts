@@ -29,6 +29,11 @@ export function division(arr, n): Array<Array<number>> {
   return tmp;
 }
 
-export function myxor (a, b)  {
+export function myxor(a, b) {
   return (a || b) && !(a && b);
-};
+}
+
+export function toFixedFor6floor(value: string) {
+  let x = parseFloat(value);
+  return (Math.floor(x * 1000000) * 0.000001).toFixed(6);
+}

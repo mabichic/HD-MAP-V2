@@ -159,6 +159,7 @@ export default function FeatureGrid({
         }
     }
     const onCellEditingStopped = (e) => {
+        console.log(e);
         if (subscription !== null) subscription.unsubscribe();
         if (e.oldValue === e.newValue) return;
         if (typeof e.newValue === "undefined") return;

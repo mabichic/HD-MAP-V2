@@ -32,7 +32,7 @@ export const setUndo = () => {
   let datas = undoDatas.filter((item, idex) => {
     return item.index === tempIndex;
   });
-  if(datas.length<1){ 
+  if (datas.length < 1) {
     loadingService.sendMessage(false);
     return;
   }
@@ -41,9 +41,11 @@ export const setUndo = () => {
   });
   setDownUnDoReDoIndex();
 
-  datas.reverse();
   for (const data of datas) {
     redoDatas.push(data);
+  }
+  datas.reverse();
+  for (const data of datas) {
     if (data.type === "DRAW") {
       data.source.removeFeature(data.feature);
     } else if (data.type === "UPDATE") {
@@ -64,7 +66,7 @@ export const setRedo = () => {
   let datas = redoDatas.filter((item, idex) => {
     return item.index === tempIndex;
   });
-  if(datas.length<1){ 
+  if (datas.length < 1) {
     loadingService.sendMessage(false);
     return;
   }
@@ -108,7 +110,10 @@ export const setModifyStartUndo = (features: Collection<Feature | any>) => {
     });
   });
 };
-export const setModifyEndUndo = (array: Array<Feature>, updateArray: Array<UndoRedoType>) => {
+export const setModifyEndUndo = (
+  array: Array<Feature>,
+  updateArray: Array<UndoRedoType>
+) => {
   if (modifyUndoDatas.length < 1) return; //이상태는 에러임
   let index = getUnDoReDoIndex();
   modifyUndoDatas.forEach((modifyUndoData) => {
@@ -127,7 +132,10 @@ export const setModifyEndUndo = (array: Array<Feature>, updateArray: Array<UndoR
   setUpUnDoReDoIndex();
 };
 
-export const setCopyUndo = (array: Array<Feature>, updateArray: Array<UndoRedoType>) => {
+export const setCopyUndo = (
+  array: Array<Feature>,
+  updateArray: Array<UndoRedoType>
+) => {
   if (array.length < 1) return;
   array.forEach((feature) => {
     undoDatas.push({
@@ -141,6 +149,13 @@ export const setCopyUndo = (array: Array<Feature>, updateArray: Array<UndoRedoTy
     });
   });
 };
-export const UndoPush = (type: "DRAW" | "MODIFY" | "DELETE" | "UPDATE", source: VectorSource<any>, feature: Feature, prevFeature: Feature | null, nextFeautre: Feature | null, index: number) => {
+export const UndoPush = (
+  type: "DRAW" | "MODIFY" | "DELETE" | "UPDATE",
+  source: VectorSource<any>,
+  feature: Feature,
+  prevFeature: Feature | null,
+  nextFeautre: Feature | null,
+  index: number
+) => {
   undoDatas.push({ type, source, feature, prevFeature, nextFeautre, index });
 };

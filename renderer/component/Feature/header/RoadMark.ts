@@ -1,4 +1,10 @@
-import { extractValues, idCheck, lookupValue, pointXYCheck, valueToArry } from "./FeatureHader";
+import {
+  extractValues,
+  idCheck,
+  lookupValue,
+  pointXYCheck,
+  valueToArry,
+} from "./FeatureHader";
 
 export const roadmarkTypeMappings = {
   0: "TYPE_NONE",
@@ -28,6 +34,9 @@ export const roadmarkSubTypeMappings = {
   12: "RM_ARROW_FORBID_S",
   13: "RM_ARROW_FORBID_U",
   14: "RM_STOPLINE_UNSIGNED_INTERSECTION",
+  15: "RM_JOIN_TO_R",
+  16: "RM_JOIN_TO_L",
+  17: "RM_STOPLINE_U_TURN",
 };
 const stopLineIDCount = (params) => {
   return params.data.StopLineID.length;
@@ -35,7 +44,7 @@ const stopLineIDCount = (params) => {
 const types = extractValues(roadmarkTypeMappings);
 const subTypes = extractValues(roadmarkSubTypeMappings);
 export const LayerRoadmarkHader = [
-  { field: "ID", valueParser: idCheck, },
+  { field: "ID", valueParser: idCheck },
   {
     field: "Type",
     cellEditor: "agSelectCellEditor",
@@ -71,8 +80,13 @@ export const LayerRoadmarkHader = [
     field: "StopLineID",
 
     valueParser: valueToArry,
-
   },
   { field: "NumPoint", editable: false },
-  { field: "PointXY", editable: true, cellEditor: "agLargeTextCellEditor", cellEditorPopup: true , valueParser: pointXYCheck},
+  {
+    field: "PointXY",
+    editable: true,
+    cellEditor: "agLargeTextCellEditor",
+    cellEditorPopup: true,
+    valueParser: pointXYCheck,
+  },
 ];

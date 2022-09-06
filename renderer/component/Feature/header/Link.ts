@@ -1,4 +1,12 @@
-import { extractValues, idCheck, linkIdCheck, lookupValue, numberCheck, pointXYCheck } from "./FeatureHader";
+import {
+  extractValues,
+  idCheck,
+  linkIdCheck,
+  linkIdCheck0Permit,
+  lookupValue,
+  numberCheck,
+  pointXYCheck,
+} from "./FeatureHader";
 
 export const linkTypeMappings = {
   0: "TYPE_NONE",
@@ -9,9 +17,6 @@ export const linkTypeMappings = {
   5: "JUN_U",
   6: "POCKET_L",
   7: "POCKET_R",
-  8: "JUN_UNPROTECTED_S",
-  9: "JUN_UNPROTECTED_L",
-  10: "JUN_UNPROTECTED_R",
 };
 export const linkSubTypeMappings = {
   0: "TYPE_NONE",
@@ -30,20 +35,20 @@ const linkSubTypes = extractValues(linkSubTypeMappings);
 const linkTwowayTypes = extractValues(linkTwowayMappings);
 
 export const LayerLnLinkHader = [
-  { field: "ID", valueParser: idCheck,},
-  { field: "MID", valueParser :  numberCheck },
-  { field: "LID", valueParser :  numberCheck },
-  { field: "RID", valueParser :  numberCheck },
-  { field: "InMID", valueParser :  numberCheck },
-  { field: "InLID", valueParser :  numberCheck },
-  { field: "InRID", valueParser :  numberCheck },
-  { field: "outMID", valueParser :  numberCheck },
-  { field: "outLID", valueParser :  numberCheck },
-  { field: "outRID", valueParser :  numberCheck },
-  { field: "Junction", valueParser :  numberCheck },
+  { field: "ID", valueParser: idCheck },
+  { field: "MID", valueParser: numberCheck },
+  { field: "LID", valueParser: numberCheck },
+  { field: "RID", valueParser: numberCheck },
+  { field: "InMID", valueParser: numberCheck },
+  { field: "InLID", valueParser: numberCheck },
+  { field: "InRID", valueParser: numberCheck },
+  { field: "outMID", valueParser: numberCheck },
+  { field: "outLID", valueParser: numberCheck },
+  { field: "outRID", valueParser: numberCheck },
+  { field: "Junction", valueParser: numberCheck },
   {
     field: "Type",
-    cellEditor: "agSelectCellEditor", 
+    cellEditor: "agSelectCellEditor",
     cellEditorParams: {
       values: linkTypes,
     },
@@ -86,12 +91,18 @@ export const LayerLnLinkHader = [
       return lookupValue(linkTwowayMappings, params.value);
     },
   },
-  { field: "RLID", valueParser :  numberCheck },
-  { field: "LLinkID", valueParser :  linkIdCheck },
-  { field: "RLinkID", valueParser :  linkIdCheck },
-  { field: "SNodeID" ,editable: false,},
-  { field: "ENodeID" ,editable: false,},
-  { field: "Speed", valueParser :  numberCheck },
-  { field: "NumPoint" ,editable: false,},
-  { field: "PointXY", editable: true, cellEditor: "agLargeTextCellEditor", cellEditorPopup: true , valueParser: pointXYCheck},
+  { field: "RLID", valueParser: numberCheck },
+  { field: "LLinkID", valueParser: linkIdCheck0Permit },
+  { field: "RLinkID", valueParser: linkIdCheck0Permit },
+  { field: "SNodeID", editable: false },
+  { field: "ENodeID", editable: false },
+  { field: "Speed", valueParser: numberCheck },
+  { field: "NumPoint", editable: false },
+  {
+    field: "PointXY",
+    editable: true,
+    cellEditor: "agLargeTextCellEditor",
+    cellEditorPopup: true,
+    valueParser: pointXYCheck,
+  },
 ];

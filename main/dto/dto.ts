@@ -1,17 +1,47 @@
-import { division } from "../common/util";
+import { division, toFixedFor6floor } from "../common/util";
 
 export interface GEOJSONTYPE {
   type: "Feature";
   id: string;
-  group: "LAYER_LANESIDE" | "LAYER_POI" | "LAYER_LN_NODE" | "LAYER_LN_LINK" | "LAYER_ROADMARK" | "LAYER_ROADLIGHT";
+  group:
+    | "LAYER_LANESIDE"
+    | "LAYER_POI"
+    | "LAYER_LN_NODE"
+    | "LAYER_LN_LINK"
+    | "LAYER_ROADMARK"
+    | "LAYER_ROADLIGHT";
   geometry: {
-    type: "Point" | "LineString" | "Polygon" | "MultiPoint" | "MultiLineString" | "MultiPolygon";
-    coordinates: Array<Array<Array<number>>> | Array<Array<number>> | Array<number>;
+    type:
+      | "Point"
+      | "LineString"
+      | "Polygon"
+      | "MultiPoint"
+      | "MultiLineString"
+      | "MultiPolygon";
+    coordinates:
+      | Array<Array<Array<number>>>
+      | Array<Array<number>>
+      | Array<number>;
   };
-  properties: LAYER_LANESIDE_PROPERTIE | LAYER_LN_LINK_PROPERTIE | LAYER_LN_NODE_PROPERTIE | LAYER_POI_PROPERTIE | LAYER_ROADLIGHT_PROPERTIE | LAYER_ROADMARK_PROPERTIE | GPS_LOG_PROPERTIE;
+  properties:
+    | LAYER_LANESIDE_PROPERTIE
+    | LAYER_LN_LINK_PROPERTIE
+    | LAYER_LN_NODE_PROPERTIE
+    | LAYER_POI_PROPERTIE
+    | LAYER_ROADLIGHT_PROPERTIE
+    | LAYER_ROADMARK_PROPERTIE
+    | GPS_LOG_PROPERTIE;
 }
 
-export const LayerNames = ["LAYER_LANESIDE", "LAYER_LN_LINK", "LAYER_LN_NODE", "LAYER_POI", "LAYER_ROADLIGHT", "LAYER_ROADMARK", "LAYER_SAFEPOINT"];
+export const LayerNames = [
+  "LAYER_LANESIDE",
+  "LAYER_LN_LINK",
+  "LAYER_LN_NODE",
+  "LAYER_POI",
+  "LAYER_ROADLIGHT",
+  "LAYER_ROADMARK",
+  "LAYER_SAFEPOINT",
+];
 
 export interface ObjectSet {
   LAYER_ROADMARK: LAYER_ROADMARK_PROPERTIE;
@@ -147,7 +177,22 @@ export class LAYER_LANESIDE_CONV implements LAYER_LANESIDE_PROPERTIE {
     );
     this.PointXY = xy.join(" ").replaceAll(",", " ");
   }
-  conv = () => this.ID + " " + this.MID + " " + this.LaneID + " " + this.Type + " " + this.Color + " " + this.NumPoint + " " + this.PointXY + " " + "\r\n";
+  conv = () =>
+    this.ID +
+    " " +
+    this.MID +
+    " " +
+    this.LaneID +
+    " " +
+    this.Type +
+    " " +
+    this.Color +
+    " " +
+    this.NumPoint +
+    " " +
+    this.PointXY +
+    " " +
+    "\r\n";
 }
 export class LAYER_LN_LINK implements LAYER_LN_LINK_PROPERTIE {
   ID: number;
@@ -343,7 +388,16 @@ export class LAYER_LN_NODE_CONV implements LAYER_LN_NODE_PROPERTIE {
     });
     this.PointXY = xy.join(" ").replaceAll(",", " ");
   }
-  conv = () => this.ID + " " + this.NumConLink + " " + this.LinkID + " " + this.PointXY + " " + "\r\n";
+  conv = () =>
+    this.ID +
+    " " +
+    this.NumConLink +
+    " " +
+    this.LinkID +
+    " " +
+    this.PointXY +
+    " " +
+    "\r\n";
 }
 export class LAYER_POI implements LAYER_POI_PROPERTIE {
   ID: number;
@@ -373,7 +427,16 @@ export class LAYER_POI_CONV implements LAYER_POI_PROPERTIE {
     this.Name = data.Name;
     this.PointXY = data.PointXY.join(" ").replaceAll(",", " ");
   }
-  conv = () => this.ID + " " + this.LinkID + " " + this.Name + " " + this.PointXY + " " + "\r\n";
+  conv = () =>
+    this.ID +
+    " " +
+    this.LinkID +
+    " " +
+    this.Name +
+    " " +
+    this.PointXY +
+    " " +
+    "\r\n";
 }
 export class LAYER_ROADLIGHT implements LAYER_ROADLIGHT_PROPERTIE {
   ID: number;
@@ -426,9 +489,9 @@ export class LAYER_ROADLIGHT_CONV implements LAYER_ROADLIGHT_PROPERTIE {
   constructor(data) {
     this.ID = Number(data.ID);
     this.LaneID = Number(data.LaneID);
-    this.Type = data.Type === "RL_HOR" ? 1 : data.Type === "RL_VIR" ? 2 : 0;
-    this.SubType = data.SubType === "RL_2" ? 1 : data.SubType === "RL_3" ? 2 : data.SubType === "RL_4" ? 3 : data.SubType === "RL_5" ? 4 : 0;
-    this.Div = data.Div === "None" ? 0 : data.Div === "GEN_RL" ? 1 : data.Div === "BUS_RL" ? 2 : data.Div === "FLASHING_RL" ? 3 : data.Div;
+    this.Type = Number(data.Type);
+    this.SubType = Number(data.SubType);
+    this.Div = Number(data.Div);
     this.NumStopLine = Number(data.NumStopLine);
     this.StopLineID = data.StopLineID.join(" ");
     this.NumPoint = Number(data.NumPoint);
@@ -477,7 +540,7 @@ export class LAYER_ROADMARK implements LAYER_ROADMARK_PROPERTIE {
     this.NumStopLine = Number(numStopline);
     this.StopLineID = stoplineID.map(Number);
     this.NumPoint = Number(array.split(" ")[4 + numStopline]);
-    
+
     this.PointXY = [
       division(
         array
@@ -508,8 +571,8 @@ export class LAYER_ROADMARK_CONV implements LAYER_ROADMARK_PROPERTIE {
     this.StopLineID = data.StopLineID.join(" ");
     this.NumPoint = Number(data.NumPoint);
     const xy = data.PointXY.map((x) =>
-      x.map((y) => 
-        y.map((z) =>{
+      x.map((y) =>
+        y.map((z) => {
           const g = Math.floor(z * 1000000).toFixed(0);
           return (Number(g) / 1000000).toFixed(6);
         })
@@ -532,6 +595,7 @@ export class LAYER_ROADMARK_CONV implements LAYER_ROADMARK_PROPERTIE {
 }
 export class LAYER_SAFEPOINT implements LAYER_SAFEPOINT_PROPERTIE {
   ID: number;
+  Type: number;
   QueryLinkID: number;
   InterLinkID: number;
   length: number;
@@ -540,16 +604,18 @@ export class LAYER_SAFEPOINT implements LAYER_SAFEPOINT_PROPERTIE {
   Index: number;
   constructor(array) {
     this.ID = Number(array.split(" ")[0]);
-    this.QueryLinkID = Number(array.split(" ")[1]);
-    this.InterLinkID = Number(array.split(" ")[2]);
-    this.length = Number(array.split(" ")[3]);
-    this.PointXY = array.split(" ").slice(4).map(parseFloat);
+    this.Type = Number(array.split(" ")[1]);
+    this.QueryLinkID = Number(array.split(" ")[2]);
+    this.InterLinkID = Number(array.split(" ")[3]);
+    this.length = Number(array.split(" ")[4]);
+    this.PointXY = array.split(" ").slice(5).map(parseFloat);
     this.group = "LAYER_SAFEPOINT";
   }
 }
 
 export class LAYER_SAFEPOINT_CONV implements LAYER_SAFEPOINT_PROPERTIE {
   ID: number;
+  Type: number;
   QueryLinkID: number;
   InterLinkID: number;
   length: number;
@@ -558,6 +624,7 @@ export class LAYER_SAFEPOINT_CONV implements LAYER_SAFEPOINT_PROPERTIE {
   Index: number;
   constructor(data) {
     this.ID = Number(data.ID);
+    this.Type = Number(data.Type);
     this.QueryLinkID = Number(data.QueryLinkID);
     this.InterLinkID = Number(data.InterLinkID);
     this.length = Number(data.length);
@@ -570,6 +637,7 @@ export class LAYER_SAFEPOINT_CONV implements LAYER_SAFEPOINT_PROPERTIE {
   conv = () => {
     let result = "";
     result += this.ID + " ";
+    result += this.Type + " ";
     result += this.QueryLinkID + " ";
     result += this.InterLinkID + " ";
     result += this.length + " ";
@@ -586,7 +654,7 @@ export class GPS_LOG implements GPS_LOG_PROPERTIE {
   Index: number;
   constructor(ID, array) {
     this.ID = Number(ID);
-    this.PointXY = division(array.map(parseFloat), 2);
+    this.PointXY = division(array.map(toFixedFor6floor), 2);
     this.group = "GPS_LOG";
   }
 }
