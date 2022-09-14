@@ -25,7 +25,7 @@ const style = {
 
 function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
     const [value, setValue] = useState("");
-    const [field, setField] = useState(fields[0].colId)
+    const [field, setField] = useState("select")
     const ValueField = () => {  
         let menu;
         
@@ -137,28 +137,34 @@ function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
                     displayEmpty
                     inputProps={{ 'aria-label': 'Without label' }}
                 >
+                    <MenuItem key={0} value={"select"}>========</MenuItem>
                     {fields.map((field) =>
                         <MenuItem key={field.colId} value={field.colId}>{field.colId}</MenuItem>
                     )}
                 </Select>
+                
                 <Typography id="modal-modal-title" variant="subtitle1" sx={{ marginLeft: '20px', marginTop: '11px' }}>
                     Value
                 </Typography>
                 {(field === "Type" || field === "Color" || field==="SubType" || field==="Twoway" || field==="Div" ) ?
                     <ValueField />
                     :
-                    <TextField id="standard-basic" variant="outlined" sx={{ marginLeft: '20px', width: '294px', marginBottom: '17px' }} size="small" value={value} onChange={(e) => setValue(e.target.value)} />
+                        <TextField id="standard-basic" variant="outlined" sx={{ marginLeft: '20px', width: '294px', marginBottom: '17px' }} size="small" value={value} onChange={(e) => setValue(e.target.value)} />
+                        
                 }
 
                 {/* <ValueField /> */}
                 {/* <TextField id="standard-basic" variant="outlined" sx={{ marginLeft: '20px', width: '294px', marginBottom: '17px' }} size="small" value={value} onChange={(e) => setValue(e.target.value)} /> */}
                 <Divider />
                 <div style={{ textAlign: 'right', padding: 0 }}>
-
+                    {(field==="select") ?
+                    ""
+                    :
                     <Button variant="outlined" href="#outlined-buttons" onClick={valueChange} sx={{ marginLeft: '20px', marginTop: '10px', marginBottom: '10px', marginRight: '8px', width: '80px' }}>
                         확인
                     </Button>
-                    <Button variant="outlined" href="#outlined-buttons" sx={{ marginRight: '20px', width: '80px' }} color="error" onClick={handleClose}>
+                    }
+                    <Button variant="outlined" href="#outlined-buttons" sx={{marginTop: '10px',marginBottom: '10px', marginRight: '20px', width: '80px' }} color="error" onClick={handleClose}>
                         취소
                     </Button>
                 </div>

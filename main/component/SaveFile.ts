@@ -47,9 +47,15 @@ export default function SaveFile(
       if (e) {
         mainWindow.webContents.send("saveFail", e);
         throw e;
+      } else {
+        try {
+          fs.writeFileSync(`${res.path}`, txts, "utf8");
+        } catch (e) {
+          mainWindow.webContents.send("saveFail", e);
+          throw e;
+        }
       }
     });
-    fs.writeFileSync(`${res.path}`, txts, "utf8");
   } catch (err) {
     mainWindow.webContents.send("saveFail", err);
   }
@@ -73,15 +79,15 @@ export function SaveAllFile(
       if (e) {
         mainWindow.webContents.send("saveFail", e);
         throw e;
+      } else {
+        let txts = convResult(object["obejcts"], object["type"]);
+        try {
+          fs.writeFileSync(`${object.path}`, txts, "utf8");
+        } catch (err) {
+          mainWindow.webContents.send("saveFail", err);
+        }
       }
     });
-
-    let txts = convResult(object["obejcts"], object["type"]);
-    try {
-      fs.writeFileSync(`${object.path}`, txts, "utf8");
-    } catch (err) {
-      mainWindow.webContents.send("saveFail", err);
-    }
   });
   mainWindow.webContents.send("saved", "저장완료!");
 }

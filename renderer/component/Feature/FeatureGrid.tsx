@@ -1,9 +1,11 @@
 import { Button } from "@mui/material";
 import { AgGridReact } from "ag-grid-react";
+import { LineString } from "ol/geom";
 import VectorSource from "ol/source/Vector";
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import MapContext from "../context/MapContext";
 import DeleteFeature from "../modify/Delete";
+import ReverseFeature from "../modify/Reverse";
 import { getUnDoReDoIndex, setUpUnDoReDoIndex, UndoPush } from "../modify/UndoRedo";
 import { alertService, confrimValueService, featureService, loadingService } from "../service/message.service";
 import FeatureEditor from "./FeatureEditor";
@@ -93,7 +95,20 @@ export default function FeatureGrid({
         confrimValueService.sendMessage("객체 제거", feautes.length + " 개의 객체를 정말 제거 하시겠습니까?", DeleteFeature, null, filteredFeatures, null);
 
     }, [gridApi]);
-
+    const lineReverse = useCallback(()=>{
+        let feautes = [];
+        gridApi.getSelectedRows().forEach((row)=>{
+            feautes.push(row.featureID);
+        });
+        if (feautes.length < 1) {
+            alertService.sendMessage("Error.", `선택하신 객체가 없습니다.`);
+            return;
+        }
+        let filteredFeatures = source.getFeatures().filter(fea => {
+            return feautes.includes(fea.getId());
+        });
+        confrimValueService.sendMessage("객체 리버스", feautes.length + " 개의 객체를 정말 리버스 하시겠습니까?", ReverseFeature, null, filteredFeatures, null);
+    }, [gridApi]);
     useEffect(() => {
         loadingService.sendMessage(true);
         return () => {
@@ -159,7 +174,6 @@ export default function FeatureGrid({
         }
     }
     const onCellEditingStopped = (e) => {
-        console.log(e);
         if (subscription !== null) subscription.unsubscribe();
         if (e.oldValue === e.newValue) return;
         if (typeof e.newValue === "undefined") return;
@@ -198,7 +212,7 @@ export default function FeatureGrid({
 
         // mapService.changeObject(dataKey, dataId, data);
     };
-
+    
     return (
 
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -210,6 +224,10 @@ export default function FeatureGrid({
                 <Button variant="outlined" onClick={deselectAll} color="inherit" size="small" style={{ marginRight: '8px' }}>전체 선택해제</Button>
                 <Button variant="outlined" onClick={zoomToFeatures} color="secondary" size="small" style={{ marginRight: '8px' }}>위치로 이동</Button>
                 <Button variant="outlined" onClick={handleOpen} color="success" size="small" style={{ marginRight: '8px' }}>선택 필드 수정</Button>
+                {type==="layerLnLink"&&
+                <Button variant="outlined" onClick={lineReverse} color="success" size="small" style={{ marginRight: '8px' }}>Line Reverse</Button>
+                }
+                
                 <Button variant="outlined" onClick={deleteFeature} color="error" size="small" style={{ marginRight: '20px' }}>삭제</Button>
             </div>
             <div className="ag-theme-alpine" style={{ flexGrow: 1, width: '100%', padding: '20px', paddingTop: '13px', backgroundColor: 'white' }}>

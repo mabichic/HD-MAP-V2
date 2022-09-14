@@ -184,6 +184,31 @@ export function linkIdCheck0Permit(params) {
       );
       return params.oldValue;
     } else {
+      if (params.data[params.colDef.field] !== 0) {
+        let oldF = params.data.source.getFeatureById(
+          params.data.group +
+            params.data.Index +
+            "_" +
+            params.data[params.colDef.field]
+        );
+        let oldTarget = oldF;
+        let oldPrevTarget = oldF.clone();
+        if (params.colDef.field === "RLinkID") {
+          oldF.set("LLinkID", 0);
+        } else if (params.colDef.field === "LLinkID") {
+          oldF.set("RLinkID", 0);
+        }
+        let oldNextTarget = oldF.clone();
+        UndoPush(
+          "UPDATE",
+          oldTarget.get("source"),
+          oldTarget,
+          oldPrevTarget,
+          oldNextTarget,
+          getUnDoReDoIndex()
+        );
+      }
+
       let f = params.data.source.getFeatureById(
         params.data.group + params.data.Index + "_" + params.newValue
       );
