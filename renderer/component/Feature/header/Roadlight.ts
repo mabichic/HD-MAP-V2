@@ -1,4 +1,11 @@
-import { extractValues, idCheck, lookupValue, numberCheck, pointXYCheck, valueToArry } from "./FeatureHader";
+import {
+  extractValues,
+  idCheck,
+  lookupValue,
+  numberCheck,
+  pointXYCheck,
+  valueToArry,
+} from "./FeatureHader";
 
 export const roadlightTypeMappings = {
   0: "TYPE_NONE",
@@ -18,17 +25,23 @@ export const roadlightDivMappings = {
   2: "BUS_RL",
   3: "FLASHING_RL",
 };
-
+export const roadlightUTrunMappings = {
+  0: "RL_U_TURN_NONE",
+  1: "RL_U_TURN_LEFT",
+  2: "RL_U_TURN_LEFT_RED",
+  3: "RL_U_TURN_LEFT_PD",
+  4: "RL_U_TURN_LEFT_ONLY",
+};
 const types = extractValues(roadlightTypeMappings);
 const subTypes = extractValues(roadlightSubTypeMappings);
 const divs = extractValues(roadlightDivMappings);
-
+const utrun = extractValues(roadlightUTrunMappings);
 const stopLineIDCount = (params) => {
   return params.data.StopLineID.length;
 };
 export const LayerRoadlightHader = [
-  { field: "ID", valueParser: idCheck, },
-  { field: "LaneID", valueParser :  numberCheck },
+  { field: "ID", valueParser: idCheck },
+  { field: "LaneID", valueParser: numberCheck },
   {
     field: "Type",
     cellEditor: "agSelectCellEditor",
@@ -74,13 +87,34 @@ export const LayerRoadlightHader = [
       return lookupValue(roadlightDivMappings, params.value);
     },
   },
+  {
+    field: "U_Turn",
+    cellEditor: "agSelectCellEditor",
+    cellEditorParams: {
+      values: divs,
+    },
+    filterParams: {
+      valueFormatter: function (params) {
+        return lookupValue(roadlightUTrunMappings, params.value);
+      },
+    },
+    valueFormatter: function (params) {
+      return lookupValue(roadlightUTrunMappings, params.value);
+    },
+  },
+
   { field: "NumStopLine", editable: false, valueGetter: stopLineIDCount },
   {
     field: "StopLineID",
-  
-    valueParser: valueToArry,
 
+    valueParser: valueToArry,
   },
   { field: "NumPoint", editable: false },
-  { field: "PointXY", editable: true, cellEditor: "agLargeTextCellEditor", cellEditorPopup: true , valueParser: pointXYCheck},
+  {
+    field: "PointXY",
+    editable: true,
+    cellEditor: "agLargeTextCellEditor",
+    cellEditorPopup: true,
+    valueParser: pointXYCheck,
+  },
 ];

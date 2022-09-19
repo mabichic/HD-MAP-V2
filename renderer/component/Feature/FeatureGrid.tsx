@@ -189,6 +189,44 @@ export default function FeatureGrid({
         }
 
 
+        console.log(e.data.group);
+        if(e.data.group==="LAYER_LN_NODE"&& e.colDef.field === "ID"){
+            if(feature.get("LinkID").length>0){
+                let datas: Array<any> = e.data.source.getFeatures().filter((feature) => {
+                    return e.data.LinkID?.includes(feature.get("ID")) && feature.get("group")==="LAYER_LN_LINK";
+                });
+                datas.forEach((f) => {
+                    let target = f;
+                    let prevTarget = f.clone();
+                    if(f.get("SNodeID")===e.oldValue) f.set("SNodeID", e.newValue);
+                    else if(f.get("ENodeID")===e.oldValue) f.set("ENodeID", e.newValue);
+                    let nextTarget = f.clone(); 
+                    UndoPush("UPDATE", target.get("source"), target, prevTarget, nextTarget, getUnDoReDoIndex());
+                })
+            }
+        }
+        if(e.data.group==="LAYER_LN_LINK"&& e.colDef.field === "ID"){
+            let sNodeId = e.data.SNodeID;
+            let eNodeId = e.data.ENodeID;
+                if (sNodeId !== "" && !isNaN(sNodeId) && sNodeId !== 0) {
+                    let node = feature.get("source").getFeatureById("LAYER_LN_NODE" + feature.get("Index") + "_" + sNodeId);
+                    let prevTarget = node?.clone();
+                    node?.set(
+                      "LinkID",[...node?.get("LinkID").filter((element) => element !== e.oldValue), e.newValue]
+                    );
+                    let nextTarget = node?.clone();
+                    UndoPush("UPDATE", node.get("source"), node, prevTarget, nextTarget, getUnDoReDoIndex());
+                  }
+                  if (eNodeId !== "" && !isNaN(eNodeId) && eNodeId !== 0) {
+                    let node = feature.get("source").getFeatureById("LAYER_LN_NODE" + feature.get("Index") + "_" + eNodeId);
+                    let prevTarget = node?.clone();
+                    node?.set(
+                      "LinkID",[...node?.get("LinkID").filter((element) => element !== e.oldValue), e.newValue]
+                    );
+                    let nextTarget = node?.clone();
+                    UndoPush("UPDATE", node.get("source"), node, prevTarget, nextTarget, getUnDoReDoIndex());
+                  }   
+        }
         if (e.data.group === "LAYER_ROADMARK" && e.colDef.field === "Type" && e.oldValue === 7) {
             let datas: Array<any> = e.data.source.getFeatures().filter((feature) => {
                 return feature.get("StopLineID")?.includes(e.data.ID);

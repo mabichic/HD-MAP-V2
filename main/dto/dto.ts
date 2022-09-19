@@ -105,6 +105,7 @@ export interface LAYER_ROADLIGHT_PROPERTIE {
   Type: number;
   SubType: number;
   Div: number;
+  U_Turn: number;
   NumStopLine: number;
   StopLineID: Array<number> | null;
   NumPoint: number;
@@ -444,6 +445,7 @@ export class LAYER_ROADLIGHT implements LAYER_ROADLIGHT_PROPERTIE {
   Type: number;
   SubType: number;
   Div: number;
+  U_Turn: number;
   NumStopLine: number;
   StopLineID: Array<number> | null;
   NumPoint: number;
@@ -451,7 +453,7 @@ export class LAYER_ROADLIGHT implements LAYER_ROADLIGHT_PROPERTIE {
   group: "LAYER_ROADLIGHT";
   Index: number;
   constructor(array) {
-    let numStopline = Number(array.split(" ")[5]);
+    let numStopline = Number(array.split(" ")[6]);
     let stoplineID = [];
     for (let i = 0; i < numStopline; i++) {
       stoplineID.push(array.split(" ")[6 + i]);
@@ -461,13 +463,14 @@ export class LAYER_ROADLIGHT implements LAYER_ROADLIGHT_PROPERTIE {
     this.Type = Number(array.split(" ")[2]);
     this.SubType = Number(array.split(" ")[3]);
     this.Div = Number(array.split(" ")[4]);
+    this.U_Turn = Number(array.split(" ")[5]);
     this.NumStopLine = Number(numStopline);
     this.StopLineID = stoplineID.map(Number);
-    this.NumPoint = Number(array.split(" ")[numStopline + 6]);
+    this.NumPoint = Number(array.split(" ")[numStopline + 7]);
     this.PointXY = division(
       array
         .split(" ")
-        .slice(7 + numStopline)
+        .slice(8 + numStopline)
         .map(parseFloat),
       2
     );
@@ -480,6 +483,7 @@ export class LAYER_ROADLIGHT_CONV implements LAYER_ROADLIGHT_PROPERTIE {
   Type: number;
   SubType: number;
   Div: number;
+  U_Turn: number;
   NumStopLine: number;
   StopLineID: Array<number> | null;
   NumPoint: number;
@@ -492,6 +496,7 @@ export class LAYER_ROADLIGHT_CONV implements LAYER_ROADLIGHT_PROPERTIE {
     this.Type = Number(data.Type);
     this.SubType = Number(data.SubType);
     this.Div = Number(data.Div);
+    this.U_Turn = Number(data.U_Turn);
     this.NumStopLine = Number(data.NumStopLine);
     this.StopLineID = data.StopLineID.join(" ");
     this.NumPoint = Number(data.NumPoint);
@@ -510,6 +515,7 @@ export class LAYER_ROADLIGHT_CONV implements LAYER_ROADLIGHT_PROPERTIE {
     result += this.Type + " ";
     result += this.SubType + " ";
     result += this.Div + " ";
+    result += this.U_Turn + " ";
     result += this.NumStopLine + " ";
     if (this.NumStopLine > 0) result += this.StopLineID + " ";
     result += this.NumPoint + " ";
