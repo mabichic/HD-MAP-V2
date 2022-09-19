@@ -91,7 +91,7 @@ export const LayerRoadlightHader = [
     field: "U_Turn",
     cellEditor: "agSelectCellEditor",
     cellEditorParams: {
-      values: divs,
+      values: utrun,
     },
     filterParams: {
       valueFormatter: function (params) {

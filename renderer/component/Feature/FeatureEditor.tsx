@@ -7,7 +7,7 @@ import { getUnDoReDoIndex, setUpUnDoReDoIndex, UndoPush } from "../modify/UndoRe
 import { alertService, featureService } from "../service/message.service";
 import { colourMappings, lanesideTypeMappings } from "./header/Laneside";
 import { linkSubTypeMappings, linkTwowayMappings, linkTypeMappings } from "./header/Link";
-import { roadlightDivMappings, roadlightSubTypeMappings, roadlightTypeMappings } from "./header/Roadlight";
+import { roadlightDivMappings, roadlightSubTypeMappings, roadlightTypeMappings, roadlightUTrunMappings } from "./header/Roadlight";
 import { roadmarkSubTypeMappings, roadmarkTypeMappings } from "./header/RoadMark";
 import { safePointTypeMappings } from "./header/Safepoint";
 const style = {
@@ -29,7 +29,7 @@ function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
     const ValueField = () => {  
         let menu;
         
-        if (field === "Type" || field === "Color" || field==="SubType"|| field==="Twoway" || field==="Div") {
+        if (field === "Type" || field === "Color" || field==="SubType"|| field==="Twoway" || field==="Div" ||field==="U_Turn") {
             if (type==='layerLaneside'&& field === "Type") menu = lanesideTypeMappings;
             else if (field === "Color") menu = colourMappings;
             else if (type==='layerLnLink'&& field === "Type") menu = linkTypeMappings;
@@ -38,6 +38,7 @@ function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
             else if (type==='layerRoadlight'&& field === "Type") menu = roadlightTypeMappings;
             else if (type==='layerRoadlight'&& field === "SubType") menu = roadlightSubTypeMappings;
             else if (type==='layerRoadlight'&& field === "Div") menu = roadlightDivMappings;
+            else if (type==='layerRoadlight'&& field === "U_Turn") menu = roadlightUTrunMappings;
             else if (type==='layerRoadmark'&& field === "Type") menu = roadmarkTypeMappings;
             else if (type==='layerRoadmark'&& field === "SubType") menu = roadmarkSubTypeMappings;
             else if (type==='layerSafepoint'&& field === "Type") menu = safePointTypeMappings;
@@ -52,7 +53,7 @@ function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
             return (
                 <Select
                     size="small"
-                    sx={{ width: '133px', marginLeft: '20px' }}
+                    sx={{ width: '233px', marginLeft: '20px' }}
                     value={value}
                     onChange={(e)=>setValue(e.target.value)}
                     displayEmpty
@@ -90,7 +91,7 @@ function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
     const fieldChange = useCallback((e) => {
 
         setField(e.target.value);
-        if (e.target.value === "Type" || e.target.value === "Color" || e.target.value === "SubType" || e.target.value === "Twoway" || e.target.value === "Div") {
+        if (e.target.value === "Type" || e.target.value === "Color" || e.target.value === "SubType" || e.target.value === "Twoway" || e.target.value === "Div"|| e.target.value === "U_Turn") {
             setValue("1");
         }else{
             setValue("");
@@ -146,7 +147,7 @@ function FeatureEditor({ handleClose, open, fields, gridRef, source, type }) {
                 <Typography id="modal-modal-title" variant="subtitle1" sx={{ marginLeft: '20px', marginTop: '11px' }}>
                     Value
                 </Typography>
-                {(field === "Type" || field === "Color" || field==="SubType" || field==="Twoway" || field==="Div" ) ?
+                {(field === "Type" || field === "Color" || field==="SubType" || field==="Twoway" || field==="Div" || field === "U_Turn" ) ?
                     <ValueField />
                     :
                         <TextField id="standard-basic" variant="outlined" sx={{ marginLeft: '20px', width: '294px', marginBottom: '17px' }} size="small" value={value} onChange={(e) => setValue(e.target.value)} />

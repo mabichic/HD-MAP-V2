@@ -78,6 +78,7 @@ export default function FeatureGrid({
             filter: true,
             editable: true,
             minWidth: 150,
+            resizable: true, 
         };
     }, []);
     const deleteFeature = useCallback(() => {
@@ -189,7 +190,6 @@ export default function FeatureGrid({
         }
 
 
-        console.log(e.data.group);
         if(e.data.group==="LAYER_LN_NODE"&& e.colDef.field === "ID"){
             if(feature.get("LinkID").length>0){
                 let datas: Array<any> = e.data.source.getFeatures().filter((feature) => {
