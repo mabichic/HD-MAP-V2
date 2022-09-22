@@ -426,7 +426,11 @@ export class LAYER_POI_CONV implements LAYER_POI_PROPERTIE {
     this.ID = Number(data.ID);
     this.LinkID = Number(data.LinkID);
     this.Name = data.Name;
-    this.PointXY = data.PointXY.join(" ").replaceAll(",", " ");
+    const xy = data.PointXY.map((y) => {
+      const z = Math.floor(y * 1000000).toFixed(0);
+      return (Number(z) / 1000000).toFixed(6);
+    });
+    this.PointXY = xy.join(" ").replaceAll(",", " ");
   }
   conv = () =>
     this.ID +
@@ -456,7 +460,7 @@ export class LAYER_ROADLIGHT implements LAYER_ROADLIGHT_PROPERTIE {
     let numStopline = Number(array.split(" ")[6]);
     let stoplineID = [];
     for (let i = 0; i < numStopline; i++) {
-      stoplineID.push(array.split(" ")[6 + i]);
+      stoplineID.push(array.split(" ")[7 + i]);
     }
     this.ID = Number(array.split(" ")[0]);
     this.LaneID = Number(array.split(" ")[1]);

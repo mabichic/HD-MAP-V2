@@ -50,6 +50,7 @@ export default function SaveFile(
       } else {
         try {
           fs.writeFileSync(`${res.path}`, txts, "utf8");
+          mainWindow.webContents.send("saved", "저장완료!");
         } catch (e) {
           mainWindow.webContents.send("saveFail", e);
           throw e;
@@ -59,7 +60,6 @@ export default function SaveFile(
   } catch (err) {
     mainWindow.webContents.send("saveFail", err);
   }
-  mainWindow.webContents.send("saved", "저장완료!");
 }
 export function SaveAllFile(
   mainWindow: BrowserWindow,
@@ -83,13 +83,13 @@ export function SaveAllFile(
         let txts = convResult(object["obejcts"], object["type"]);
         try {
           fs.writeFileSync(`${object.path}`, txts, "utf8");
+          mainWindow.webContents.send("saved", "저장완료!");
         } catch (err) {
           mainWindow.webContents.send("saveFail", err);
         }
       }
     });
   });
-  mainWindow.webContents.send("saved", "저장완료!");
 }
 interface resInterface {
   type: any;
