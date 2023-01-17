@@ -21,3 +21,5 @@ yarn
 "build": "nextron build",   (window, mac, linux)
 "postinstall": "electron-builder install-app-deps"
 ```
+
+<img src ="https://github.com/mabichic/HD-MAP-V2/blob/master/resources/screen.png?raw=true"/>
