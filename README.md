@@ -23,3 +23,4 @@ yarn
 ```
 
 <img src ="https://github.com/mabichic/HD-MAP-V2/blob/master/resources/screen.png?raw=true"/>
+<img src="https://github.com/mabichic/HD-MAP-V2/blob/master/resources/screen2.png?raw=true"/>
